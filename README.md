@@ -2,14 +2,30 @@
 
 (work in progress)
 
-Package for Paper-Reviewer matching which available at http://pr.scienceofscience.org/.
+Package for Paper-Reviewer matching which available at http://pr.scienceofscience.org/
+(implementation based on this [article](http://www.cis.upenn.edu/~cjtaylor/PUBLICATIONS/pdfs/TaylorTR08.pdf)).
 This package solves problem of assigning paper to reviewers with constrains by solving linear programming problem.
 We minimize global distance between papers and reviewers in topic space (e.g. topic can be Principal component,
   Latent Semantic Analysis).
 
-Here is a diagram on how we solve the problem.
+Here is a diagram of problem setup and how we solve the problem.
+
+<img src="data/problem_setup.png" width="300">
 
 <img src="data/paper_reviewer_matching.png" width="600">
+
+
+## Usage
+
+Here is a
+
+```python
+from paper_reviewer_matcher import preprocess, affinity_computation
+papers = list(map(preprocess, papers)) # list of papers' abstract
+reviewers = list(map(preprocess, reviewers)) # list of reviewers' abstract
+A = affinity_computation(papers, reviewers)
+# solve linear programming problem (adding soon)
+```
 
 
 ## Dependencies
