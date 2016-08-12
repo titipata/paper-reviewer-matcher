@@ -128,7 +128,6 @@ def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=10,
     N_r = sp.dok_matrix((n_reviewers, n_edges), dtype=np.int)
     N_r[j, range(n_edges)] = -1
 
-
     K = sp.vstack([N_e, N_p, N_r, sp.identity(n_edges), -sp.identity(n_edges)])
 
     d = [max_reviewers_per_paper] * n_papers + [max_papers_per_reviewer] * n_reviewers + \

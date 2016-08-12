@@ -33,6 +33,9 @@ x_sol = linprog(v, K.toarray(), d)['x'] # using scipy linprog for python 3
 b = create_assignment(x_sol, A) # transform solution to assignment matrix
 ```
 
+Output `b` is a binary matrix assignment where rows correspond to papers and
+column correspond to reviewers.
+
 
 ## Dependencies
 
