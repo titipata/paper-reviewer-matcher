@@ -51,7 +51,7 @@ def linprog(f, A, b):
 
     x_sol = np.array([x_tmp.SolutionValue() for x_tmp in x])
 
-    return x_sol
+    return {'x': x_sol, 'status': result_status}
 
 
 def test_example():

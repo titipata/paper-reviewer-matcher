@@ -17,14 +17,20 @@ Here is a diagram of problem setup and how we solve the problem.
 
 ## Usage
 
-Here is a
+I haven't put function together in one nice big function. However, here are
+functions to solve paper-reviewer assignment problem
 
 ```python
-from paper_reviewer_matcher import preprocess, affinity_computation
+from paper_reviewer_matcher import preprocess, affinity_computation,
+                                   create_lp_matrix, linprog, create_assignment
 papers = list(map(preprocess, papers)) # list of papers' abstract
 reviewers = list(map(preprocess, reviewers)) # list of reviewers' abstract
 A = affinity_computation(papers, reviewers)
-# solve linear programming problem (adding soon)
+# set conflict of interest by setting A[i, j] to -1000 or lower value
+v, K, d = create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=0,
+                              min_papers_per_reviewer=10, max_papers_per_reviewer=10)
+x_sol = linprog(v, K.toarray(), d)['x'] # using scipy linprog for python 3
+b = create_assignment(x_sol, A) # transform solution to assignment matrix
 ```
 
 
@@ -34,7 +40,7 @@ A = affinity_computation(papers, reviewers)
 - scipy
 - nltk
 - scikit-learn
-- [or-tools](https://github.com/google/or-tools) (for linear programming solver)
+- [or-tools](https://github.com/google/or-tools) (linear programming solver for python 2.7)
 
 please refer to [Stackoverflow](http://stackoverflow.com/questions/26593497/cant-install-or-tools-on-mac-10-10)
 on how to install `or-tools` on MacOSX. I use `pip` to install `protobuf` before installing `or-tools`
