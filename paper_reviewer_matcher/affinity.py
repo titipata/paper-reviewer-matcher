@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.sparse as sp
 
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -86,8 +87,8 @@ def affinity_computation(papers, reviewers,
 
     return A
 
-def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=0,
-                        min_papers_per_reviewer=10, max_papers_per_reviewer=10):
+def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=10,
+                        min_papers_per_reviewer=0, max_papers_per_reviewer=10):
     """
     The problem formulation of paper-reviewer matching problem is as follow:
     we want to maximize this cost function with constraint
@@ -120,10 +121,13 @@ def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=0,
     N_e = sp.dok_matrix((n_papers + n_reviewers, n_edges), dtype=np.float)
     N_e[i, range(n_edges)] = 1
     N_e[j + n_papers, range(n_edges)] = 1
-    N_p = sp.dok_matrix((n_reviewers, n_edges), dtype=np.int)
-    N_p[i, range(nedges)] = -1
+
+    N_p = sp.dok_matrix((n_papers, n_edges), dtype=np.int)
+    N_p[i, range(n_edges)] = -1
+
     N_r = sp.dok_matrix((n_reviewers, n_edges), dtype=np.int)
-    N_r[j, range(nedges)] = -1
+    N_r[j, range(n_edges)] = -1
+
 
     K = sp.vstack([N_e, N_p, N_r, sp.identity(n_edges), -sp.identity(n_edges)])
 

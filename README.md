@@ -27,8 +27,8 @@ papers = list(map(preprocess, papers)) # list of papers' abstract
 reviewers = list(map(preprocess, reviewers)) # list of reviewers' abstract
 A = affinity_computation(papers, reviewers)
 # set conflict of interest by setting A[i, j] to -1000 or lower value
-v, K, d = create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=0,
-                              min_papers_per_reviewer=3, max_papers_per_reviewer=6)
+v, K, d = create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=3,
+                              min_papers_per_reviewer=0, max_papers_per_reviewer=3)
 x_sol = linprog(v, K.toarray(), d)['x'] # using scipy linprog for python 3
 b = create_assignment(x_sol, A) # transform solution to assignment matrix
 ```
