@@ -28,7 +28,7 @@ reviewers = list(map(preprocess, reviewers)) # list of reviewers' abstract
 A = affinity_computation(papers, reviewers)
 # set conflict of interest by setting A[i, j] to -1000 or lower value
 v, K, d = create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=0,
-                              min_papers_per_reviewer=10, max_papers_per_reviewer=10)
+                              min_papers_per_reviewer=3, max_papers_per_reviewer=6)
 x_sol = linprog(v, K.toarray(), d)['x'] # using scipy linprog for python 3
 b = create_assignment(x_sol, A) # transform solution to assignment matrix
 ```
@@ -52,7 +52,7 @@ $ pip install ortools
 
 ## Members
 
-- Daniel Acuna
-- Titipat Achakulvisut
+- Daniel Acuna (main author)
+- Titipat Achakulvisut (re-write code)
 - Tulakan Ruangrong
 - Konrad Kording
