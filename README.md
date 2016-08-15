@@ -1,8 +1,9 @@
-# Paper-Reviewer matcher
+# Paper-Reviewer Matcher
 
 (work in progress)
 
-Package for Paper-Reviewer matching which available at http://pr.scienceofscience.org/
+Package for Paper-Reviewer matching algorithm based on topic modeling.
+Algorithm is available to use easily at http://pr.scienceofscience.org/
 (implementation based on this [article](http://www.cis.upenn.edu/~cjtaylor/PUBLICATIONS/pdfs/TaylorTR08.pdf)).
 This package solves problem of assigning paper to reviewers with constrains by solving linear programming problem.
 We minimize global distance between papers and reviewers in topic space (e.g. topic can be Principal component,
@@ -17,15 +18,17 @@ Here is a diagram of problem setup and how we solve the problem.
 
 ## Usage
 
-I haven't put function together in one nice big function. However, here are
-functions to solve paper-reviewer assignment problem
+I haven't put function together in one nice big function. However, here is an
+example to solve paper-reviewer assignment problem.
 
 ```python
 from paper_reviewer_matcher import preprocess, affinity_computation,
                                    create_lp_matrix, linprog, create_assignment
 papers = list(map(preprocess, papers)) # list of papers' abstract
 reviewers = list(map(preprocess, reviewers)) # list of reviewers' abstract
-A = affinity_computation(papers, reviewers)
+A = affinity_computation(papers, reviewers,
+                         n_components=10, min_df=1, max_df=0.8,
+                         weighting='tfidf', projection='pca')
 # set conflict of interest by setting A[i, j] to -1000 or lower value
 v, K, d = create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=3,
                               min_papers_per_reviewer=0, max_papers_per_reviewer=3)
@@ -33,8 +36,15 @@ x_sol = linprog(v, K.toarray(), d)['x'] # using scipy linprog for python 3
 b = create_assignment(x_sol, A) # transform solution to assignment matrix
 ```
 
-Output `b` is a binary matrix assignment where rows correspond to papers and
-column correspond to reviewers.
+Output `b` is a binary assignment array where rows correspond to papers and
+column correspond to reviewers, where row and column _i, j_ correspond to the
+assignment of paper _i_ to reviewer _j_. For example, if we want to see paper
+in row 0 will be assigned to which reviewers
+
+```python
+i = 0 # first paper
+print([reviewers[b_] for b_ in np.nonzero(b[i])[0]]) # abstract of reviewers who will review paper 0
+```
 
 
 ## Dependencies
@@ -55,7 +65,7 @@ $ pip install ortools
 
 ## Members
 
-- Daniel Acuna (main author)
+- Daniel Acuna (corresponding author)
 - Titipat Achakulvisut (re-write code)
 - Tulakan Ruangrong
 - Konrad Kording
