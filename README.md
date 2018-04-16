@@ -58,10 +58,17 @@ print([reviewers[b_] for b_ in np.nonzero(b[i])[0]]) # abstract of reviewers who
 please refer to [Stackoverflow](http://stackoverflow.com/questions/26593497/cant-install-or-tools-on-mac-10-10)
 on how to install `or-tools` on MacOSX. I use `pip` to install `protobuf` before installing `or-tools`
 
-```
+```bash
 $ pip install protobuf==3.0.0b4
 $ pip install ortools
 ```
+
+for Python 3.6,
+
+```bash
+$ pip install --user --upgrade ortools
+```
+
 
 ## Members
 

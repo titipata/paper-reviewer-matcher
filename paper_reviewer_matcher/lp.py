@@ -41,7 +41,7 @@ def linprog(f, A, b):
 
     # state the constraints
     for i in range(n):
-        c[i] = solver.Constraint(-infinity, b[i])
+        c[i] = solver.Constraint(-infinity, int(b[i]))
         for j in A.col[A.row == i]:
             c[i].SetCoefficient(x[j], A.data[np.logical_and(A.row == i, A.col == j)][0])
 
