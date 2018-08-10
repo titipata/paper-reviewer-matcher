@@ -33,13 +33,13 @@ def nest_answer(people, formatted):
     return [[p, formatted[p]] for p, v in people]
 
 
-def schedule_to_timeslot(schedule):
+def schedule_to_timeslot(schedule, n_timeslot=15):
     """
     Create personal schedule from list of schedule
     """
     schedule_df = pd.DataFrame(schedule, columns=['person', 'person_to_meet'])
     person_to_meet_df = pd.DataFrame(schedule_df.person_to_meet.values.tolist(), 
-                                    columns=range(1, 15))
+                                    columns=range(1, n_timeslot))
     # schedule to dataframe
     schedule_df = pd.concat((schedule_df[['person']], person_to_meet_df), axis=1)
 
@@ -49,7 +49,7 @@ def schedule_to_timeslot(schedule):
 
 
     timeslot_list = []
-    for i in range(1, 13):
+    for i in range(1, n_timeslot):
         timeslot_df = schedule_df[['person', i]].dropna().astype(int).reset_index(drop=True)
         P = np.zeros((len(person_list), len(person_list)), dtype=int)
         
@@ -112,8 +112,8 @@ def create_dating_schedule(person_df):
     # for dating at CCN
     v, K, d = create_lp_matrix(
         A, 
-        min_reviewers_per_paper=10, max_reviewers_per_paper=10,
-        min_papers_per_reviewer=10, max_papers_per_reviewer=10
+        min_reviewers_per_paper=n_meeting, max_reviewers_per_paper=n_meeting,
+        min_papers_per_reviewer=n_meeting, max_papers_per_reviewer=n_meeting
     )
     x_sol = linprog(v, K, d)['x']
     b = create_assignment(x_sol, A)
@@ -129,15 +129,31 @@ def create_dating_schedule(person_df):
     return schedule
 
 
+def partion_cluster(D):
+    """
+    Given a distance matrix, performing hierarchical clustering to rank it
+    """
+    import fastcluster
+    import scipy.cluster.hierarchy as hierarchy
+    linkage = fastcluster.linkage(D,
+                                method='centroid',
+                                preserve_input=True)
+    partition = hierarchy.fcluster(linkage,
+                                t=0.5,
+                                criterion='distance') # distance
+    return partition
+
+
 if __name__ == '__main__':
     """
     Example script to create dating schedule for CCN 2018 conference
     """
     person_df = pd.read_csv('person.csv')
-    person_id_map = {r['PersonID']:r['FullName'] for _, r in person_df.iterrows()}
+    person_id_map = {r['PersonID']: r['FullName'] for _, r in person_df.iterrows()}
 
     schedule = create_dating_schedule(person_df)
-    person_schedule_all = schedule_to_timeslot(schedule)
+    n_timeslot = len(schedule[0][-1]) + 1
+    person_schedule_all = schedule_to_timeslot(schedule, n_timeslot=n_timeslot)
 
     # print out 
     output_text = []
@@ -147,7 +163,7 @@ if __name__ == '__main__':
         output_text.extend(['Dating schedule'])
         output_text.extend(['--------------------'])
         r = 0
-        for i in range(1, 13):
+        for i in range(1, n_timeslot):
             person_to_meet = [l for l in list(person_schedule_df[i]) if not pd.isnull(l)]
             if len(person_to_meet) > 0:
                 table_number = person_schedule_df['table_number'].iloc[r]
