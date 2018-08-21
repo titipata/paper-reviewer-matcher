@@ -93,11 +93,14 @@ def schedule_to_timeslot(schedule, n_timeslot=15):
     return person_schedule_all # list of dataframe each contains schedule
 
 
-def create_dating_schedule(person_df):
+def create_dating_schedule(person_df, n_meeting=10):
     """
     Function to create speed dating schedule at CCN 2018 conference
 
-    person_df: dataframe contains - PersonID, FullName, Abstract
+    Parameters
+    ==========
+    person_df: pandas dataframe contains - PersonID, FullName, Abstract
+    n_meeting: int, number of meeting we would like to have
     """
     # linear programming
     persons_1 = list(map(preprocess, list(person_df['Abstract'])))
