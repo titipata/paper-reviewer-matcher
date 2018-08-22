@@ -132,7 +132,7 @@ def create_dating_schedule(person_df, n_meeting=10):
     return schedule
 
 
-def partion_cluster(D):
+def partition_cluster(D):
     """
     Given a distance matrix, performing hierarchical clustering to rank it
     """
@@ -147,18 +147,45 @@ def partion_cluster(D):
     return partition
 
 
+def convert_names_to_ids(names, person_id_map, threshold=85):
+    """
+    Convert string of names with separated comma to list of IDs using fuzzy string match
+
+    Parameters
+    ==========
+    names: str, string in the following format 'FirstName1 LastName1, ...'
+    person_id_map: dict, dictionary mapping id to name
+
+    Example
+    =======
+    >> convert_names_to_ids('Jone Doe, Sarah Doe', 
+                            {1: 'Jone Doe', 2: 'Sarah Deo'}, threshold=85) # output [1, 2]
+    """
+    from fuzzywuzzy import fuzz
+
+    matched_ids = []
+    names = [name.strip() for name in names.split(',')]
+    for name in names:
+        matched_ids.extend([idx for (idx, n) in person_id_map.items() if fuzz.ratio(n, name) >= threshold])
+    return pd.unique(matched_ids)
+
+
 if __name__ == '__main__':
     """
     Example script to create dating schedule for CCN 2018 conference
     """
-    person_df = pd.read_csv('person.csv')
+    person_df = pd.ExcelFile('CCN18_MindMatchData.xlsx').parse('Grid Results')
+    person_df['FullName'] = person_df['NameFirst'] + ' ' + person_df['NameLast']
+    person_df['PersonID'] = np.arange(len(person_df))
     person_id_map = {r['PersonID']: r['FullName'] for _, r in person_df.iterrows()}
+    person_affil_map = {r['PersonID']: r['Affiliation'] for _, r in person_df.iterrows()}
 
     schedule = create_dating_schedule(person_df)
     n_timeslot = len(schedule[0][-1]) + 1
     person_schedule_all = schedule_to_timeslot(schedule, n_timeslot=n_timeslot)
 
-    # print out 
+    # print out
+    n_meeting = 6
     output_text = []
     for person_schedule_df in person_schedule_all:
         output_text.extend(['You are: ', str(person_id_map[person_schedule_df.person.unique()[0]])])
@@ -166,7 +193,7 @@ if __name__ == '__main__':
         output_text.extend(['Dating schedule'])
         output_text.extend(['--------------------'])
         r = 0
-        for i in range(1, n_timeslot):
+        for i in range(1, n_meeting + 1):
             person_to_meet = [l for l in list(person_schedule_df[i]) if not pd.isnull(l)]
             if len(person_to_meet) > 0:
                 table_number = person_schedule_df['table_number'].iloc[r]
