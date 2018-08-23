@@ -1,3 +1,9 @@
+"""
+Code snippet for producing CCN Mind Matching session 2018. 
+We create affinity matrix of people-people using topic modeling 
+then solve linear programming problem and apply networkx to solve the schedule problem
+"""
+
 import numpy as np
 import pandas as pd
 from paper_reviewer_matcher import preprocess, affinity_computation, create_lp_matrix, linprog, create_assignment
@@ -8,6 +14,12 @@ from collections import Counter
 
 
 def build_line_graph(people):
+    """
+    Edge coloring and Vizing's theorem solution 
+    can be found from Stack Overflow question below
+
+    ref: https://stackoverflow.com/questions/51758406/creating-time-schedule-from-list-of-people-and-who-they-have-to-meet
+    """
     G = nx.Graph()
     G.add_edges_from(((p, q) for p, L in people for q in L))
     return nx.line_graph(G)
@@ -101,6 +113,11 @@ def create_dating_schedule(person_df, n_meeting=10):
     ==========
     person_df: pandas dataframe contains - PersonID, FullName, Abstract
     n_meeting: int, number of meeting we would like to have
+
+    Output
+    ======
+    schedule: list, list of person id and person ids to meet in the 
+        following format: [PersonID, [PersonID to meet]]
     """
     # linear programming
     persons_1 = list(map(preprocess, list(person_df['Abstract'])))
@@ -139,11 +156,11 @@ def partition_cluster(D):
     import fastcluster
     import scipy.cluster.hierarchy as hierarchy
     linkage = fastcluster.linkage(D,
-                                method='centroid',
-                                preserve_input=True)
+                                  method='centroid',
+                                  preserve_input=True)
     partition = hierarchy.fcluster(linkage,
-                                t=0.5,
-                                criterion='distance') # distance
+                                   t=0.5,
+                                   criterion='distance') # distance
     return partition
 
 
