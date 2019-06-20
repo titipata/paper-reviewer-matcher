@@ -57,9 +57,10 @@ def linprog(f, A, b):
 if __name__ == '__main__':
     article_path, reviewer_path, people_path = [path for path in glob('path/to/*.csv') 
                                                 if 'CCN' in path and 'fixed' not in path]
+    # there is a problem when encoding lines in the given CSV so we have to use ISO-8859-1 instead
     article_df = pd.read_csv(article_path) # has columns `PaperID`, `Title`, `Abstract`, `PersonIDList`
     reviewer_df = pd.read_csv(reviewer_path, encoding="ISO-8859-1") # has columns `PersonID`, `Abstract`
-    people_df = pd.read_csv(people_path, encoding="ISO-8859-1") # has 
+    people_df = pd.read_csv(people_path, encoding="ISO-8859-1") # has columns `PersonID`, `FullName`
 
     papers = list((article_df['Title'] + ' ' + article_df['Abstract']).map(preprocess))
     reviewers = list(reviewer_df['Abstract'].map(preprocess))
@@ -89,8 +90,9 @@ if __name__ == '__main__':
     for i, j in zip(coi_df.paper_id.tolist(), coi_df.person_id.tolist()):
         A_trim[i, j] = -1000
     
-    v, K, d = create_lp_matrix(A_trim, min_reviewers_per_paper=6, max_reviewers_per_paper=6,
-                                min_papers_per_reviewer=3, max_papers_per_reviewer=10)
+    v, K, d = create_lp_matrix(A_trim, 
+                               min_reviewers_per_paper=6, max_reviewers_per_paper=6,
+                               min_papers_per_reviewer=3, max_papers_per_reviewer=10)
     x_sol = linprog(v, K, d)['x']
     b = create_assignment(x_sol, A_trim)
     reviewer_ids = list(reviewer_df.PersonID)
