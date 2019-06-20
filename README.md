@@ -11,15 +11,16 @@ We minimize global distance between papers and reviewers in topic space (e.g. to
 
 Here is a diagram of problem setup and how we solve the problem.
 
-<img src="data/problem_setup.png" width="300">
+<img src="figures/problem_setup.png" width="300">
 
-<img src="data/paper_reviewer_matching.png" width="600">
+<img src="figures/paper_reviewer_matching.png" width="600">
 
 
 ## Example script
 
 - `ccn_mind_matching.py` contains script for Mind Matching session (match scientists to scientists) for CCN conference
-- `ccn_paper_reviewer_matching.py` contains script for matching publications to reviewers for CCN conference
+- `ccn_paper_reviewer_matching.py` contains script for matching publications to reviewers for CCN conference, see 
+example of CSV files in `data` folder
 
 ## Example Usage
 

@@ -124,7 +124,8 @@ def assign_articles_to_reviewers(article_df, reviewer_df, people_df):
 
 
 if __name__ == '__main__':
-    article_path, reviewer_path, people_path = [path for path in glob('/Users/titipata/Downloads/*.csv') 
+    CCN_PATH = '/path/to/*.csv'
+    article_path, reviewer_path, people_path = [path for path in glob(CCN_PATH) 
                                                 if 'CCN' in path and 'fixed' not in path]
     # there is a problem when encoding lines in the given CSV so we have to use ISO-8859-1 instead
     article_df = pd.read_csv(article_path) # has columns `PaperID`, `Title`, `Abstract`, `PersonIDList`
