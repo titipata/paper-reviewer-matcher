@@ -16,9 +16,14 @@ Here is a diagram of problem setup and how we solve the problem.
 <img src="data/paper_reviewer_matching.png" width="600">
 
 
-## Usage
+## Example script
 
-I haven't put function together in one nice big function. However, here is an
+- `ccn_mind_matching.py` contains script for Mind Matching session (match scientists to scientists) for CCN conference
+- `ccn_paper_reviewer_matching.py` contains script for matching publications to reviewers for CCN conference
+
+## Example Usage
+
+I haven't put all functions together in a nice big function. However, here is an
 example to solve paper-reviewer assignment problem.
 
 ```python
