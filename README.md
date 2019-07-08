@@ -1,6 +1,5 @@
 # Paper-Reviewer Matcher
 
-(work in progress)
 
 Package for Paper-Reviewer matching algorithm based on topic modeling.
 Algorithm is available to use easily at http://pr.scienceofscience.org/
@@ -18,11 +17,12 @@ Here is a diagram of problem setup and how we solve the problem.
 
 ## Example script
 
-- `ccn_mind_matching.py` contains script for Mind Matching session (match scientists to scientists) for CCN conference
-- `ccn_paper_reviewer_matching.py` contains script for matching publications to reviewers for CCN conference, see 
+- `ccn_mind_matching.py` contains script for Mind Matching session (match scientists to scientists) for [CCN conference](https://ccneuro.org/2018/)
+- `ccn_paper_reviewer_matching.py` contains script for matching publications to reviewers for [CCN conference](https://ccneuro.org/2019/), see 
 example of CSV files in `data` folder
 
-## Example Usage
+
+## Example Script
 
 I haven't put all functions together in a nice big function. However, here is an
 example to solve paper-reviewer assignment problem.
