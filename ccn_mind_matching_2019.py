@@ -156,6 +156,59 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
         return coi_df
 
 
+def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx'):
+    """
+    Create full schedule for mind matching into word document format
+    """
+    pages = []
+    for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
+        page = []
+        page.extend([
+            person_id_map[person_id], 
+            person_affil_map[person_id], 
+            'RegID: {}'.format(registration_id_map[person_id])
+        ])
+        page.extend([
+            '-------------------',
+            'Mind Matching Schedule',
+            '-------------------'
+        ])
+        for _, r in mind_matching_schedule_df.iterrows():
+            page.extend([
+                'timeslot: {}, table number: {}, mind-match: {} ({})'.\
+                format(r['timeslot'], r['table_number'], person_id_map[r['person_to_meet_id']], person_affil_map[r['person_to_meet_id']])
+            ])
+        pages.append('\n'.join(page))
+
+    # save to word document
+    document = Document()
+    for page in pages:
+        document.add_paragraph(page)
+        document.add_page_break()
+    document.save(file_name)
+
+
+def convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mindmatch_2019_minimized.csv'):
+    """
+    Convert full schedule for mind matching into CSV file with 2 columns
+    ``RegistrantID`` and ``ScheduleTables`` e.g. 1013, 1a|32a|1a|1a|1a|1a
+    """
+    # create the minimized version of CCN match (4 pairs per table, 32 tables for 250 people)
+    table_map = {k: v for k, v in enumerate([str(i) + c 
+                                            for i in range(1, 33) 
+                                            for c in 'abcd'], start=1)}
+
+    # output CSV for CCN mind-matching with 2 columns RegistrantID, ScheduleTables e.g. 1013, 1a|32a|1a|1a|1a|1a
+    minimized_mind_matching = []
+    for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
+        minimized_mind_matching.append({
+            'RegistrantID': registration_id_map[person_id], 
+            'ScheduleTables': '|'.join([table_map[e] for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
+        })
+    minimized_mind_matching_df = pd.DataFrame(minimized_mind_matching)
+    minimized_mind_matching_df.to_csv(file_name, index=False)
+
+
 if __name__ == '__main__':
     df = pd.read_csv('CN19_MindMatchData_20190903-A.csv', encoding='iso-8859-1')
     df['full_name'] = df['NameFirst'] + ' ' + df['NameLast']
@@ -235,46 +288,5 @@ if __name__ == '__main__':
 
 
     # create full schedule for mind matching
-    pages = []
-    for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
-        page = []
-        page.extend([
-            person_id_map[person_id], 
-            person_affil_map[person_id], 
-            'RegID: {}'.format(registration_id_map[person_id])
-        ])
-        page.extend([
-            '-------------------',
-            'Mind Matching Schedule',
-            '-------------------'
-        ])
-        for _, r in mind_matching_schedule_df.iterrows():
-            page.extend([
-                'timeslot: {}, table number: {}, mind-match: {} ({})'.\
-                format(r['timeslot'], r['table_number'], person_id_map[r['person_to_meet_id']], person_affil_map[r['person_to_meet_id']])
-            ])
-        pages.append('\n'.join(page))
-
-    # save to word document
-    document = Document()
-    for page in pages:
-        document.add_paragraph(page)
-        document.add_page_break()
-    document.save('ccn_mindmatch_2019.docx')
-
-    # create the minimized version of CCN match (4 pairs per table, 32 tables for 250 people)
-    table_map, t = {}, 1
-    for table_number in range(1, 33):
-        for char in 'abcd':
-            table_map[t] = str(table_number) + char
-            t += 1
-
-    # output CSV for CCN mind-matching with columns RegistrantID, ScheduleTables e.g. 1013, 1a|32a|1a|1a|1a|1a
-    minimized_mind_matching = []
-    for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
-        minimized_mind_matching.append([
-            registration_id_map[person_id], 
-            '|'.join([table_map[e] for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
-        ])
-    minimized_mind_matching_df = pd.DataFrame(minimized_mind_matching, columns=['RegistrantID', 'ScheduleTables'])
-    minimized_mind_matching_df.to_csv('ccn_mindmatch_2019_minimized.csv', index=False)
+    convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx')
+    convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mindmatch_2019_minimized.csv')
