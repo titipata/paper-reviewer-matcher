@@ -234,7 +234,7 @@ if __name__ == '__main__':
     mind_matching_df = pd.concat(mind_matching_df)
 
 
-    # create schedule for mind matching
+    # create full schedule for mind matching
     pages = []
     for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
         page = []
@@ -261,3 +261,20 @@ if __name__ == '__main__':
         document.add_paragraph(page)
         document.add_page_break()
     document.save('ccn_mindmatch_2019.docx')
+
+    # create the minimized version of CCN match (4 pairs per table, 32 tables for 250 people)
+    table_map, t = {}, 1
+    for table_number in range(1, 33):
+        for char in 'abcd':
+            table_map[t] = str(table_number) + char
+            t += 1
+
+    # output CSV for CCN mind-matching with columns RegistrantID, ScheduleTables e.g. 1013, 1a|32a|1a|1a|1a|1a
+    minimized_mind_matching = []
+    for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
+        minimized_mind_matching.append([
+            registration_id_map[person_id], 
+            '|'.join([table_map[e] for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
+        ])
+    minimized_mind_matching_df = pd.DataFrame(minimized_mind_matching, columns=['RegistrantID', 'ScheduleTables'])
+    minimized_mind_matching_df.to_csv('ccn_mindmatch_2019_minimized.csv', index=False)
