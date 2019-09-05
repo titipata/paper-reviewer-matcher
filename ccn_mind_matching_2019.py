@@ -122,6 +122,13 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
     ``full_name``, ``mindMatchExcludeList`` column, and 
     a dictionary that map ``full_name`` to person_id, 
     create conflict of interest dataframe
+
+    Parameters
+    ==========
+    df: dataframe, original mind matching dataset
+    people_maps: list, list dictionary that map person id to their person_id, full_name, and affiliation
+    threshold: int, fuzzy string match ratio for matching name in ``mindMatchExcludeList`` and ``full_name``
+    coreffered: bool, if True, add conflict of interest for people who mention the same person
     """
     coi_list = []
     for i, r in df.iterrows():
@@ -138,10 +145,9 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
             if len(exclude_list) > 0:
                 for e in exclude_list:
                     coi_list.append([i, e])
-
-    # add extra co-referred COI for people who refers the same person
     coi_df = pd.DataFrame(coi_list, columns=['person_id', 'person_id_exclude'])
 
+    # add extra co-referred COI for people who refers the same person
     if coreffered:
         coi_coreferred = [[g, list(g_df.person_id)] for g, g_df in coi_df.groupby(['person_id_exclude']) 
                         if len(list(g_df.person_id)) >= 2]
@@ -285,7 +291,6 @@ if __name__ == '__main__':
         match_df['timeslot'] = i + 1
         mind_matching_df.append(match_df)
     mind_matching_df = pd.concat(mind_matching_df)
-
 
     # create full schedule for mind matching
     convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx')
