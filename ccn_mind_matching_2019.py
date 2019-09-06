@@ -30,14 +30,14 @@ from docx import Document
 
 
 def linprog(f, A, b):
-    '''
+    """
     Solve the following linear programming problem
             maximize_x (f.T).dot(x)
             subject to A.dot(x) <= b
     where   A is a sparse matrix (coo_matrix)
             f is column vector of cost function associated with variable
             b is column vector
-    '''
+    """
 
     # flatten the variable
     f = f.ravel()
@@ -129,6 +129,10 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
     people_maps: list, list dictionary that map person id to their person_id, full_name, and affiliation
     threshold: int, fuzzy string match ratio for matching name in ``mindMatchExcludeList`` and ``full_name``
     coreffered: bool, if True, add conflict of interest for people who mention the same person
+
+    Output
+    ======
+    coi_df: dataframe, conflict of interest
     """
     coi_list = []
     for i, r in df.iterrows():
@@ -139,8 +143,8 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
                     p['person_id'] for p in people_maps if 
                     exclude in p['full_name'] or 
                     fuzz.ratio(p['full_name'], exclude) >= threshold or 
-                    fuzz.ratio(p['affiliation'], exclude) >= threshold]
-                )
+                    fuzz.ratio(p['affiliation'], exclude) >= threshold
+                ])
             exclude_list = sorted(pd.unique(exclude_list))
             if len(exclude_list) > 0:
                 for e in exclude_list:
@@ -164,7 +168,8 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
 
 def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx'):
     """
-    Create full schedule for mind matching into word document format
+    Create full schedule for mind matching into word document format,
+    printing person name, affiliation, registration id, and list of person to meet
     """
     pages = []
     for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
@@ -175,9 +180,9 @@ def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_20
             'RegID: {}'.format(registration_id_map[person_id])
         ])
         page.extend([
-            '-------------------',
+            '----------------------',
             'Mind Matching Schedule',
-            '-------------------'
+            '----------------------'
         ])
         for _, r in mind_matching_schedule_df.iterrows():
             page.extend([
@@ -252,10 +257,9 @@ if __name__ == '__main__':
     A_trim = np.vstack(A_trim)
 
     v, K, d = create_lp_matrix(A_trim, 
-                           min_reviewers_per_paper=6, max_reviewers_per_paper=6,
-                           min_papers_per_reviewer=6, max_papers_per_reviewer=6)
+                               min_reviewers_per_paper=6, max_reviewers_per_paper=6,
+                               min_papers_per_reviewer=6, max_papers_per_reviewer=6)
     x_sol = linprog(v, K, d)['x']
-
     b = create_assignment(x_sol, A_trim)
 
     output = []
@@ -292,6 +296,6 @@ if __name__ == '__main__':
         mind_matching_df.append(match_df)
     mind_matching_df = pd.concat(mind_matching_df)
 
-    # create full schedule for mind matching
+    # create full schedule for mind matching in word document format and minimized CSV format (for organizers)
     convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx')
     convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mindmatch_2019_minimized.csv')
