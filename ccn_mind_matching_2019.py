@@ -116,7 +116,7 @@ def split_exclude_string(people):
     return [p.strip() for p in people_list if p.strip() is not '']
 
 
-def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
+def create_coi_dataframe(df, people_maps, threshold=85, coreferred=True):
     """
     For a given dataframe of for mind-match people with 
     ``full_name``, ``mindMatchExcludeList`` column, and 
@@ -128,7 +128,7 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
     df: dataframe, original mind matching dataset
     people_maps: list, list dictionary that map person id to their person_id, full_name, and affiliation
     threshold: int, fuzzy string match ratio for matching name in ``mindMatchExcludeList`` and ``full_name``
-    coreffered: bool, if True, add conflict of interest for people who mention the same person
+    coreferred: bool, if True, add extra conflict of interest for people who mentioned the same person
 
     Output
     ======
@@ -152,7 +152,7 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
     coi_df = pd.DataFrame(coi_list, columns=['person_id', 'person_id_exclude'])
 
     # add extra co-referred COI for people who refers the same person
-    if coreffered:
+    if coreferred:
         coi_coreferred = [[g, list(g_df.person_id)] for g, g_df in coi_df.groupby(['person_id_exclude']) 
                         if len(list(g_df.person_id)) >= 2]
 
@@ -166,7 +166,7 @@ def create_coi_dataframe(df, people_maps, threshold=85, coreffered=True):
         return coi_df
 
 
-def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx'):
+def convert_mind_match_to_document(mind_matching_df, table_map=None, file_name='ccn_mindmatch_2019.docx'):
     """
     Create full schedule for mind matching into word document format,
     printing person name, affiliation, registration id, and list of person to meet
@@ -185,9 +185,13 @@ def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_20
             '----------------------'
         ])
         for _, r in mind_matching_schedule_df.iterrows():
+            if table_map is not None:
+                table_number = table_map[r['table_number']]
+            else:
+                table_number = r['table_number']
             page.extend([
                 'timeslot: {}, table number: {}, mind-match: {} ({})'.\
-                format(r['timeslot'], r['table_number'], person_id_map[r['person_to_meet_id']], person_affil_map[r['person_to_meet_id']])
+                format(r['timeslot'], table_number, person_id_map[r['person_to_meet_id']], person_affil_map[r['person_to_meet_id']])
             ])
         pages.append('\n'.join(page))
 
@@ -199,23 +203,24 @@ def convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_20
     document.save(file_name)
 
 
-def convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mindmatch_2019_minimized.csv'):
+def convert_mind_match_to_minimized_format(mind_matching_df, table_map=None, file_name='ccn_mindmatch_2019_minimized.csv'):
     """
     Convert full schedule for mind matching into CSV file with 2 columns
     ``RegistrantID`` and ``ScheduleTables`` e.g. 1013, 1a|32a|1a|1a|1a|1a
     """
-    # create the minimized version of CCN match (4 pairs per table, 32 tables for 250 people)
-    table_map = {k: v for k, v in enumerate([str(i) + c 
-                                            for i in range(1, 33) 
-                                            for c in 'abcd'], start=1)}
-
     # output CSV for CCN mind-matching with 2 columns RegistrantID, ScheduleTables e.g. 1013, 1a|32a|1a|1a|1a|1a
     minimized_mind_matching = []
     for person_id, mind_matching_schedule_df in mind_matching_df.groupby('person_id'):
-        minimized_mind_matching.append({
-            'RegistrantID': registration_id_map[person_id], 
-            'ScheduleTables': '|'.join([table_map[e] for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
-        })
+        if table_map is not None:
+            minimized_mind_matching.append({
+                'RegistrantID': registration_id_map[person_id], 
+                'ScheduleTables': '|'.join([table_map[e] for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
+            })
+        else:
+            minimized_mind_matching.append({
+                'RegistrantID': registration_id_map[person_id], 
+                'ScheduleTables': '|'.join([e for e in list(mind_matching_schedule_df.sort_values('timeslot').table_number.values)])
+            })
     minimized_mind_matching_df = pd.DataFrame(minimized_mind_matching)
     minimized_mind_matching_df.to_csv(file_name, index=False)
 
@@ -223,7 +228,6 @@ def convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mind
 if __name__ == '__main__':
     df = pd.read_csv('CN19_MindMatchData_20190903-A.csv', encoding='iso-8859-1')
     df['full_name'] = df['NameFirst'] + ' ' + df['NameLast']
-    df['mindMatchExcludeList'] = df.mindMatchExclude.fillna(',').map(split_exclude_string)
     df['person_id'] = list(range(len(df)))
 
     people_maps = [{'person_id': r['person_id'], 
@@ -233,7 +237,9 @@ if __name__ == '__main__':
     person_id_map = {r['person_id']: r['full_name'] for _, r in df.iterrows()}
     person_affil_map = {r['person_id']: r['Affiliation'] for _, r in df.iterrows()}
     registration_id_map = {r['person_id']: r['RegistrantID'] for _, r in df.iterrows()}
-    coi_df = create_coi_dataframe(df, people_maps, threshold=85)
+    if 'mindMatchExclude' in df.columns:
+        df['mindMatchExcludeList'] = df.mindMatchExclude.fillna(',').map(split_exclude_string)
+        coi_df = create_coi_dataframe(df, people_maps, threshold=85, coreferred=True)
 
     # create assignment matrix
     n_meeting = 6
@@ -243,24 +249,27 @@ if __name__ == '__main__':
                              n_components=10, min_df=2, max_df=0.8,
                              weighting='tfidf', projection='pca')
     # add constraints: conflict of interest
-    A[np.arange(len(A)), np.arange(len(A))] = -1000
+    A[np.arange(len(A)), np.arange(len(A))] = -1000 # set diagonal to prevent matching with themselve
     for _, r in coi_df.iterrows():
         A[r['person_id'], r['person_id_exclude']] = -1000
         A[r['person_id_exclude'], r['person_id']] = -1000
 
     # trimming affinity matrix to reduce problem size
+    n_trim = 2
     A_trim = []
     for r in range(len(A)):
         a = A[r, :]
-        a[np.argsort(a)[0:2]] = 0
+        a[np.argsort(a)[0:n_trim]] = 0
         A_trim.append(a)
     A_trim = np.vstack(A_trim)
 
+    print('Solving linear programming for Mind-Matching session...')
     v, K, d = create_lp_matrix(A_trim, 
                                min_reviewers_per_paper=6, max_reviewers_per_paper=6,
                                min_papers_per_reviewer=6, max_papers_per_reviewer=6)
     x_sol = linprog(v, K, d)['x']
     b = create_assignment(x_sol, A_trim)
+    print('Done!')
 
     output = []
     for i in range(len(b)):
@@ -296,6 +305,12 @@ if __name__ == '__main__':
         mind_matching_df.append(match_df)
     mind_matching_df = pd.concat(mind_matching_df)
 
+    # For CCN, we have table each for 4 pairs and we need to have 32 tables for the session i.e. 4 pairs per table, 32 tables for 250 people
+    table_map = {k: v for k, v in enumerate([str(i) + c 
+                                            for i in range(1, 33) 
+                                            for c in 'abcd'], start=1)}
+
     # create full schedule for mind matching in word document format and minimized CSV format (for organizers)
-    convert_mind_match_to_document(mind_matching_df, file_name='ccn_mindmatch_2019.docx')
-    convert_mind_match_to_minimized_format(mind_matching_df, file_name='ccn_mindmatch_2019_minimized.csv')
+    convert_mind_match_to_document(mind_matching_df, table_map, file_name='ccn_mindmatch_2019.docx') # output for organizer to see 
+    convert_mind_match_to_minimized_format(mind_matching_df, table_map, file_name='ccn_mindmatch_2019_minimized.csv')
+    print('Saved matched files into CSV and DOCX format.')
