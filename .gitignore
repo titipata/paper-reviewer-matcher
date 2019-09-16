@@ -1,5 +1,7 @@
 # Created by https://www.gitignore.io
 
+mind_match_feedback_form/data/*.json
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

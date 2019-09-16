@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mind Matching Feedback</title>
+    {% include 'head.html' %}
+</head>
+
+<body>
+
+<div class="container">
+
+    <script>
+        $(document).ready(function(){
+            // Check Radio-box
+            $(".rating input:radio").attr("checked", false);
+        
+            $('.rating input').click(function () {
+                $(".rating span").removeClass('checked');
+                $(this).parent().addClass('checked');
+            });
+        
+            $('input:radio').change(
+              function(){
+                var userRating = this.value;
+            }); 
+        });
+    </script>
+
+
+    <h1><b>Feedback Form: CCN 2019 Mind-Match</b></h1>
+    This is a feedback form for CCN Mind-Matching 2019. 
+    For each match, you can rate <br/> 
+    (1) satisfaction of the match you get<br/>
+    (2) research relevance in the scale 1 to 5.<br/>
+    where 1 means the least satisfactory or least relevance and 5 means highly satisfactory or highly relevance.
+    We also include a box that you can check if you know the matched before before.
+
+    <hr>
+    <p>
+        <b>Your information:</b> <br/>
+        <i class="fa fa-user-circle-o" aria-hidden="true"></i> {{ full_name }} <br/>
+        <i class="fa fa-university" aria-hidden="true"></i> {{ affiliation }} <br/>
+        <i class="fa fa-id-card-o" aria-hidden="true"></i> {{ registrant_id }} (registration id)
+        <hr>
+    </p>
+
+
+    <form action="{{ url_for('handle_submit') }}" method="post">
+        {% for i, match_dict in enumerate(matches_info) %}
+            <b>Mind Match {{i + 1}}: </b>
+            {{match_dict.full_name}}, {{match_dict.affiliation}}, 
+            <i class="fa fa-envelope-o" aria-hidden="true"></i> {{match_dict.email}}
+            <br/>
+            Research Relevance: 
+                <div class="rating">
+                    <span><input type="radio" name="relevance_{{i}}" id="str5" value="1"><label for="rev_str1"></label></span>
+                    <span><input type="radio" name="relevance_{{i}}" id="str4" value="2"><label for="rev_str2"></label></span>
+                    <span><input type="radio" name="relevance_{{i}}" id="str3" value="3"><label for="rev_str3"></label></span>
+                    <span><input type="radio" name="relevance_{{i}}" id="str2" value="4"><label for="rev_str4"></label></span>
+                    <span><input type="radio" name="relevance_{{i}}" id="str1" value="5"><label for="rev_str5"></label></span>
+                </div>
+            <br/>
+            Satisfaction: <br/>
+                <div class="rating">
+                    <span><input type="radio" name="satisfactory_{{i}}" id="str5" value="1"><label for="sat_str1"></label></span>
+                    <span><input type="radio" name="satisfactory_{{i}}" id="str4" value="2"><label for="sat_str2"></label></span>
+                    <span><input type="radio" name="satisfactory_{{i}}" id="str3" value="3"><label for="sat_str3"></label></span>
+                    <span><input type="radio" name="satisfactory_{{i}}" id="str2" value="4"><label for="sat_str4"></label></span>
+                    <span><input type="radio" name="satisfactory_{{i}}" id="str1" value="5"><label for="sat_str5"></label></span>
+                </div>
+            <br/>
+
+            Did you know the person before the session? 
+            <input type="checkbox" name="coi_{{i}}" value="{{i}}" id="mind_match_{{i}}">
+            <hr>
+        {% endfor %}
+        
+        <div class="submit-button-wrapper">
+            <input type="hidden" name="registrant_id" value="{{registrant_id}}">
+            <input type="submit" class="override-button-font override-button-size btn btn-warning" value="Submit" name="submitbtn">
+        </div>
+
+    </form>
+    <br/>
+</div>
+
+{% include 'footer.html' %}
+
+</body>
+</html>
