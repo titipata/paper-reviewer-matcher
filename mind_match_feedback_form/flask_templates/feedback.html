@@ -17,8 +17,8 @@
     For each match, you can rate <br/>
     (1) satisfaction of the match you get<br/>
     (2) research relevance in the scale 1 to 5.<br/>
-    where 1 means the least satisfactory or least relevance and 5 means highly satisfactory or highly relevance.
-    We also include a box that you can check if you know the matched before before.
+    where 1 means the least satisfactory or least relevance and 5 means highly satisfactory or highly relevance.<br/>
+    We also include a box that you can check if you know the matched person before before.
 
     <hr/>
     <p>
@@ -75,6 +75,15 @@
             </div>
             <hr/>
         {% endfor %}
+
+        <p><b>(optional) additional feedback for the session</b></p>
+        <textarea
+          class="form-control"
+          rows="3" id="abstract"
+          name="text_input"
+          placeholder="put your additional feedback here!"
+          value="{{ request.form.get('text_input', '') }}"></textarea>
+        <br/>
 
         <div class="submit-button-wrapper">
             <input type="hidden" name="registrant_id" value="{{registrant_id}}">
