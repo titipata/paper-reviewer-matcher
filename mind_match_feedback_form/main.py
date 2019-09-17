@@ -82,7 +82,8 @@ def handle_submit():
             'satisfactory': satisfactory,
             'coi': coi,
             'feedback_text': feedback_text,
-            'arrange_before': arrange_before
+            'arrange_before': arrange_before,
+            'timestamp': int(datetime.now(tz=timezone.utc).timestamp() * 1000)
         })
         save_json(feedback_data, FEEDBACK_DATA_PATH)
     # return to default page
