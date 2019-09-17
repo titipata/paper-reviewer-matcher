@@ -3,6 +3,7 @@ import json
 import flask
 from flask import Flask, request
 from gevent.pywsgi import WSGIServer
+from datetime import timezone, datetime
 
 
 def read_json(file_path):
@@ -35,7 +36,6 @@ FEEDBACK_DATA_PATH = 'data/ccn_feedback.json'
 mind_match_data = json.load(open(MINDMATCH_DATA_PATH, 'r'))
 
 
-
 @app.route("/", methods=['GET', 'POST'])
 def index():
     return flask.render_template('index.html')
@@ -44,7 +44,7 @@ def index():
 @app.route('/regid/<reg_id>')
 def feedback_form(reg_id):
     try:
-        data = [d for d in mind_match_data 
+        data = [d for d in mind_match_data
                 if d['registrant_id'] == int(reg_id)][0]
         for match in data['matches_info']:
             match.pop('registrant_id', None)
@@ -69,11 +69,13 @@ def handle_submit():
     if request.method == 'POST':
         feedback_data = read_json(FEEDBACK_DATA_PATH)
         registrant_id = request.form['registrant_id']
-        feedback_text = request.form['text_input']
-        relevances = [request.form.get('relevance_%s' % i, '0') for i in range(0, 6)]
-        satisfactory = [request.form.get('satisfactory_%s' % i, '0') for i in range(0, 6)]
+        feedback_text = request.form.get('text_input', '')
+        relevances = [request.form.get('relevance_%s' % i, '0')
+                      for i in range(0, 6)]
+        satisfactory = [request.form.get(
+            'satisfactory_%s' % i, '0') for i in range(0, 6)]
         coi = [request.form.get('coi_%s' % i, '0') for i in range(0, 6)]
-        arrange_before = request.form['before_checkbox']
+        arrange_before = request.form.get('before_checkbox', '0')
         feedback_data.append({
             'registrant_id': registrant_id,
             'relevances': relevances,
