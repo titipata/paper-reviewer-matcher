@@ -73,12 +73,14 @@ def handle_submit():
         relevances = [request.form.get('relevance_%s' % i, '0') for i in range(0, 6)]
         satisfactory = [request.form.get('satisfactory_%s' % i, '0') for i in range(0, 6)]
         coi = [request.form.get('coi_%s' % i, '0') for i in range(0, 6)]
+        arrange_before = request.form['before_checkbox']
         feedback_data.append({
             'registrant_id': registrant_id,
             'relevances': relevances,
             'satisfactory': satisfactory,
             'coi': coi,
-            'feedback_text': feedback_text
+            'feedback_text': feedback_text,
+            'arrange_before': arrange_before
         })
         save_json(feedback_data, FEEDBACK_DATA_PATH)
     # return to default page

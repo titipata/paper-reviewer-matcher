@@ -76,14 +76,25 @@
             <hr/>
         {% endfor %}
 
-        <p><b>(optional) additional feedback for the session</b></p>
+
+        <p><b>Additional feedback for the session</b></p>
+
         <textarea
           class="form-control"
           rows="3" id="abstract"
           name="text_input"
-          placeholder="put your additional feedback here!"
+          placeholder="(optional) put your additional feedback here! (e.g. should it be arrange in different format? more diversity?)"
           value="{{ request.form.get('text_input', '') }}"></textarea>
         <br/>
+
+        <div class="row">
+          <div class="col-sm-6 label">
+              Do you think it will be more beneficial to have mind matching session before or early the conference?
+          </div>
+          <div class="col-sm-6">
+          <input type="checkbox" name="before_checkbox" value="{{ request.form.get('before_checkbox', '0') }}" id="before_checkbox">
+          <span class="checkmark"></span>
+        </div>
 
         <div class="submit-button-wrapper">
             <input type="hidden" name="registrant_id" value="{{registrant_id}}">
