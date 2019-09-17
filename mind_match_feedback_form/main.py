@@ -3,7 +3,7 @@ import json
 import flask
 from flask import Flask, request
 from gevent.pywsgi import WSGIServer
-from datetime import timezone, datetime
+import datetime
 
 
 def read_json(file_path):
@@ -83,7 +83,7 @@ def handle_submit():
             'coi': coi,
             'feedback_text': feedback_text,
             'arrange_before': arrange_before,
-            'timestamp': int(datetime.now(tz=timezone.utc).timestamp() * 1000)
+            'timestamp': str(datetime.datetime.now())
         })
         save_json(feedback_data, FEEDBACK_DATA_PATH)
     # return to default page
