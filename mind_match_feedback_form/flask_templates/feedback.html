@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Mind Matching Feedback</title>
-    {% include 'head.html' %}
+  <title>Mind Matching Feedback</title>
+  {% include 'head.html' %}
 </head>
 
 <body>
-
-<div class="container">
+  <div class="container">
     <h1><b>Feedback Form: CCN 2019 Mind-Match</b></h1>
     This is a feedback form for CCN Mind-Matching 2019.
     For each match, you can rate <br/>
@@ -18,161 +17,199 @@
 
     <hr/>
     <p>
-        <b>Your information:</b> <br/>
-        <i class="fa fa-user-circle-o" aria-hidden="true"></i> {{ full_name }} <br/>
-        <i class="fa fa-university" aria-hidden="true"></i> {{ affiliation }} <br/>
-        <i class="fa fa-id-card-o" aria-hidden="true"></i> {{ registrant_id }} (registration id)
-        <hr/>
+      <b>Your information:</b> <br/>
+      <i class="fa fa-user-circle-o" aria-hidden="true"></i> {{ full_name }} <br/>
+      <i class="fa fa-university" aria-hidden="true"></i> {{ affiliation }} <br/>
+      <i class="fa fa-id-card-o" aria-hidden="true"></i> {{ registrant_id }} (registration id)
+      <hr/>
     </p>
 
-
     <form action="{{ url_for('handle_submit') }}" method="post">
-        {% for i, match_dict in enumerate(matches_info) %}
-            <b>Mind Match {{i + 1}}: </b>
-            {{match_dict.full_name}}, {{match_dict.affiliation}},
-            <i class="fa fa-envelope-o" aria-hidden="true"></i> {{match_dict.email}}
-            <br/>
-            <div class="row">
-              <div class="col-sm-6 label">
-                  Research Relevance:
-              </div>
-              <div class="rating col-sm-6 label">
-                  <span>1</span>
-                  <span><input type="radio" name="relevance_{{i}}" id="str5" value="1"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="relevance_{{i}}" id="str4" value="2"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="relevance_{{i}}" id="str3" value="3"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="relevance_{{i}}" id="str2" value="4"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="relevance_{{i}}" id="str1" value="5"><i class="fa fa-star-o"></i></span>
-                  <span>5</span>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-sm-6 label">
-                  Satisfaction:
-              </div>
-              <div class="rating col-sm-6 label">
-                  <span>1</span>
-                  <span><input type="radio" name="satisfactory_{{i}}" id="str5" value="1"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="satisfactory_{{i}}" id="str4" value="2"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="satisfactory_{{i}}" id="str3" value="3"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="satisfactory_{{i}}" id="str2" value="4"><i class="fa fa-star-o"></i></span>
-                  <span><input type="radio" name="satisfactory_{{i}}" id="str1" value="5"><i class="fa fa-star-o"></i></span>
-                  <span>5</span>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-sm-6 label">
-                  Did you know the person before the session?
-              </div>
-              <div class="col-sm-6">
-                  <input type="checkbox" name="coi_{{i}}" value="{{i}}" id="mind_match_{{i}}">
-                  <span class="checkmark"></span>
-              </div>
-            </div>
-            <hr/>
-        {% endfor %}
-
-        <p><b>Additional feedback for the session</b></p>
-
-        <textarea
-          class="form-control"
-          rows="3"
-          id="abstract"
-          name="text_input"
-          placeholder="(optional) put your additional feedback here! (e.g. should it be arrange in different format? more diversity?)"
-        ></textarea>
+      {% for i, match_dict in enumerate(matches_info) %}
+        <b>Mind Match {{i + 1}}:</b>
+        {{match_dict.full_name}}, {{match_dict.affiliation}},
+        <i class="fa fa-envelope-o" aria-hidden="true"></i> {{match_dict.email}}
         <br/>
-
         <div class="row">
           <div class="col-sm-6 label">
-              Do you think it will be more beneficial to have mind matching session before or early the conference?
+            Research Relevance:
           </div>
-          <div class="col-sm-6">
-          <input type="checkbox" name="before_checkbox" value="1" id="before_checkbox">
-          <span class="checkmark"></span>
+          <div class="rating col-sm-6 label">
+            <span>1</span>
+            <span><input type="radio" name="relevance_{{i}}" id="str5" value="1"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="relevance_{{i}}" id="str4" value="2"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="relevance_{{i}}" id="str3" value="3"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="relevance_{{i}}" id="str2" value="4"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="relevance_{{i}}" id="str1" value="5"><i class="fa fa-star-o"></i></span>
+            <span>5</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 label">
+            Satisfaction:
+          </div>
+          <div class="rating col-sm-6 label">
+            <span>1</span>
+            <span><input type="radio" name="satisfactory_{{i}}" id="str5" value="1"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="satisfactory_{{i}}" id="str4" value="2"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="satisfactory_{{i}}" id="str3" value="3"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="satisfactory_{{i}}" id="str2" value="4"><i class="fa fa-star-o"></i></span>
+            <span><input type="radio" name="satisfactory_{{i}}" id="str1" value="5"><i class="fa fa-star-o"></i></span>
+            <span>5</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-6 label">
+            Did you know the person before the session?
+          </div>
+          <div class="col-sm-6 checkmark">
+            <span>
+              <input type="checkbox" name="coi_{{i}}" value="{{i}}" id="mind_match_{{i}}">
+              <i class="far fa-square"></i>
+            </span>
+          </div>
+        </div>
+        <hr/>
+      {% endfor %}
+
+      <p><b>Additional feedback for the session</b></p>
+
+      <textarea
+        class="form-control"
+        rows="3"
+        id="abstract"
+        name="text_input"
+        placeholder="(optional) put your additional feedback here! (e.g. should it be arrange in different format? more diversity?)"
+      ></textarea>
+      <br/>
+
+      <div class="row">
+        <div class="col-sm-6 label">
+          Do you think it will be more beneficial to have mind matching session before or early the conference?
         </div>
 
-        <div class="submit-button-wrapper">
-            <input type="hidden" name="registrant_id" value="{{registrant_id}}">
-            <input type="submit" class="override-button-font override-button-size btn btn-warning" value="Submit" name="submitbtn">
+        <div class="col-sm-6 checkmark">
+          <span>
+            <input type="checkbox" name="before_checkbox" value="1" id="before_checkbox">
+            <i class="far fa-square"></i>
+          </span>
         </div>
+      </div>
 
+      <div class="submit-button-wrapper">
+        <input type="hidden" name="registrant_id" value="{{registrant_id}}">
+        <input type="submit" class="override-button-font override-button-size btn btn-warning" value="Submit" name="submitbtn">
+      </div>
     </form>
     <br/>
-</div>
+  </div>
 
-{% include 'footer.html' %}
+  {% include 'footer.html' %}
 
-<style>
-.rating {
-    float:left;
-    width:300px;
-}
-.rating span { position:relative; }
-.rating span input {
-    position:absolute;
-    top:0px;
-    left:0px;
-    opacity:0;
-}
-.rating .fa-star {
-  color: orange;
-}
-.rating i, .rating input, .rating span {
-  font-size: 1.4em;
-  width: 1.4em;
-  height: 1.4em;
-  text-align: center;
-}
-/* input[type=checkbox] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-.checkmark {
-  position: relative;
-  height: 25px;
-  width: 25px;
-  background-color: #eee;
-} */
-</style>
+  <style>
+    .rating {
+      float:left;
+      width:300px;
+    }
+    .rating span {
+      position:relative;
+    }
+    .rating span input {
+      position:absolute;
+      opacity:0;
+    }
+    .rating .fa-star {
+      color: orange;
+    }
+    .rating i, .rating input, .rating span {
+      font-size: 1.4em;
+      width: 1.4em;
+      height: 1.4em;
+      text-align: center;
+    }
+    .rating i, .rating input {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark span input {
+      cursor: pointer;
+      position:absolute;
+      opacity:0;
+    }
+    .checkmark span {
+      position: relative;
+    }
+    .checkmark i {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .checkmark i, .checkmark input, .checkmark span {
+      font-size: 1.4em;
+      width: 1.4em;
+      height: 1.4em;
+      text-align: center;
+    }
+  </style>
 
-<script>
-  $(document).ready(function(){
-      // Check Radio-box
+  <script>
+    const isChecked = (className) => {
+      // check icon has class 'fa-check-square'
+      return className.includes('fa-check-square');
+    }
+
+    const toggleCheck = (iconDOM, inputDOM) => {
+      // fa-square
+      // fa-check-square
+      const className = iconDOM.attr('class');
+
+      // toggle icon and input
+      if (isChecked(className)) {
+        iconDOM.removeClass('fa-check-square');
+        iconDOM.addClass('fa-square');
+        inputDOM.attr('checked', false);
+      } else {
+        iconDOM.removeClass('fa-square');
+        iconDOM.addClass('fa-check-square');
+        inputDOM.attr('checked', true);
+      }
+    }
+
+    $(document).ready(function(){
+      // reset radio box
       $(".rating input:radio").attr("checked", false);
-
+      // radio box handler
       $('.rating input').click(function () {
-          // reset all items of this select group in a row to unchecked
-          $(this).parent().parent().children().map((_, e) => {
-            // span
-            $(e).removeClass('checked');
+        // reset all items of this select group in a row to unchecked
+        $(this).parent().parent().children().map((_, e) => {
+          // span
+          $(e).removeClass('checked');
+          // input
+          $(e).children('input').attr("checked", false);
+          // stars
+          $(e).children('i').removeClass('fa-star');
+          $(e).children('i').addClass('fa-star-o');
+        });
 
-            // input
-            $(e).children('input').attr("checked", false);
+        // set checked for span and input
+        $(this).parent().addClass('checked');
+        $(this).attr("checked", true);
 
-            // stars
-            $(e).children('i').removeClass('fa-star');
-            $(e).children('i').addClass('fa-star-o');
-          });
-
-          // set checked for span and input
-          $(this).parent().addClass('checked');
-          $(this).attr("checked", true);
-
-          // set checked on star
-          $(this).siblings().removeClass('fa-star-o');
-          $(this).siblings().addClass('fa-star');
+        // set checked on star
+        $(this).siblings().removeClass('fa-star-o');
+        $(this).siblings().addClass('fa-star');
       });
 
-      $('input:radio').change(
-        function(){
-          var userRating = this.value;
-      });
-  });
-</script>
+      // checkbox handler
+      $('.checkmark').click(function() {
+        const spanParent = $(this).children('span');
+        const icon = spanParent.children('i');
+        const input = spanParent.children('input');
 
+        toggleCheck(icon, input);
+      })
+    });
+  </script>
 </body>
 </html>
