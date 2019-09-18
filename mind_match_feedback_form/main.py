@@ -2,7 +2,6 @@ import os
 import json
 import flask
 from flask import Flask, request
-from gevent.pywsgi import WSGIServer
 import datetime
 
 
@@ -98,5 +97,4 @@ def handle_submit():
 
 
 if __name__ == "__main__":
-    http_server = WSGIServer(('0.0.0.0', 5000), app)
-    http_server.serve_forever()
+    app.run(debug=True, host='0.0.0.0', thread=True)
