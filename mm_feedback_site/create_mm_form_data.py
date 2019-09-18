@@ -1,5 +1,6 @@
 """
-
+Create the mind-matching data for the site from the matched mind-matching CSV file 
+and CSV data given from the conference
 """
 import pandas as pd
 import json
