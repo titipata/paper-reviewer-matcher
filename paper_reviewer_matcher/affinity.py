@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from .vectorizer import LogEntropyVectorizer, BM25Vectorizer
 from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.neighbors import NearestNeighbors
-from sklearn.metrics.pairwise import euclidean_distances
+from sklearn.metrics.pairwise import euclidean_distances, cosine_distances
 
 __all__ = ["affinity_computation",
            "create_lp_matrix",
@@ -15,6 +15,7 @@ def affinity_computation(papers, reviewers,
                          weighting='tfidf',
                          projection='svd',
                          min_df=3, max_df=0.8,
+                         distance='euclidean',
                          lowercase=True, norm='l2',
                          analyzer='word', token_pattern=r'\w{1,}',
                          ngram_range=(1, 1),
@@ -31,6 +32,7 @@ def affinity_computation(papers, reviewers,
     weighting: str, weighting scheme for count vector matrix
         this can be ('count', 'tfidf', 'entropy', 'bm25')
     projection: str, either 'svd' or 'pca' for topic modeling
+    distance: str, either 'euclidean' or 'cosine' distance
 
 
     Returns
@@ -38,7 +40,6 @@ def affinity_computation(papers, reviewers,
     A: ndarray, affinity array from given papers and reviewers
     """
     n_papers = len(papers)
-    n_reviwers = len(reviewers)
 
     if weighting == 'count':
         model = CountVectorizer(min_df=min_df, max_df=max_df,
@@ -83,7 +84,13 @@ def affinity_computation(papers, reviewers,
     paper_vectors = X_topic[:n_papers, :]
     reviewer_vectors = X_topic[n_papers:, :]
 
-    A = -euclidean_distances(paper_vectors, reviewer_vectors) # dense affinity matrix
+    if distance == 'euclidean':
+        A = - euclidean_distances(paper_vectors, reviewer_vectors) # dense affinity matrix
+    elif distance == 'cosine':
+        A = - cosine_distances(paper_vectors, reviewer_vectors) # dense affinity matrix
+    else:
+        A = None
+        print("Distance function can only be selected from `euclidean` or `cosine`")
 
     return A
 
