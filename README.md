@@ -11,7 +11,7 @@ Here is a diagram of problem setup and how we solve the problem.
 To perform Mind Match, you can clone the repository and run the follows
 
 ``` sh
-python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=0
+python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=600
 ```
 
 directly in this path. This should produce a matching output `output_match.csv` in this relative location.

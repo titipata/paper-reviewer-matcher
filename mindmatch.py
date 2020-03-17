@@ -30,7 +30,8 @@ from docopt import docopt
 from ortools.linear_solver import pywraplp
 from paper_reviewer_matcher import preprocess, affinity_computation, \
                                    create_lp_matrix, create_assignment
-
+from fuzzywuzzy import fuzz
+from tqdm import tqdm
 
 def linprog(f, A, b):
     """
@@ -78,11 +79,25 @@ def linprog(f, A, b):
     return {'x': x_sol, 'status': result_status}
 
 
+def compute_conflicts(df):
+    """
+    Compute conflict for a given dataframe
+    """
+    cois = []
+    for i, r in tqdm(df.iterrows()):
+        exclude_list = r['conflicts'].split(';')
+        for j, r_ in df.iterrows():
+            if max([fuzz.ratio(r_['fullname'], n) for n in exclude_list]) >= 85:
+                cois.append([i, j])
+                cois.append([j, i])
+    return cois
+
+
 if __name__ == "__main__":
     arguments = docopt(__doc__, version='MindMatch 0.1.dev')
 
     file_name = arguments['PATH']
-    df = pd.read_csv(file_name).fillna('').head(200)
+    df = pd.read_csv(file_name).fillna('')
     assert 'user_id' in df.columns, "CSV file must have ``user_id`` in the columns"
     assert 'fullname' in df.columns, "CSV file must have ``fullname`` in the columns"
     assert 'abstracts' in df.columns, "CSV file must have ``abstracts`` in the columns"
@@ -117,6 +132,11 @@ if __name__ == "__main__":
                              n_components=30, min_df=3, max_df=0.85,
                              weighting='tfidf', projection='pca')
     A[np.arange(len(A)), np.arange(len(A))] = -1000  # set diagonal to prevent matching with themselve
+
+    print('Compute conflicts... (this may take a bit)')
+    cois = compute_conflicts(df)
+    A[cois] = -1000
+    print('Done computing conflicts!')
 
     # trimming affinity matrix to reduce the problem size
     if n_trim != 0:
