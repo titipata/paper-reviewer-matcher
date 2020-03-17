@@ -11,10 +11,11 @@ Here is a diagram of problem setup and how we solve the problem.
 To perform Mind Match, you can clone the repository and run the follows
 
 ``` sh
-python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=600
+python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=800
 ```
 
 directly in this path. This should produce a matching output `output_match.csv` in this relative location.
+Here, we have around 1,300 users and recommended to trim around 800. This takes 2-3 hours to run.
 
 ## Example script for the conferences
 
