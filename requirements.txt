@@ -1,3 +1,4 @@
+docopt
 numpy
 scipy
 nltk
