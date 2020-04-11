@@ -8,13 +8,15 @@ Here is a diagram of problem setup and how we solve the problem.
 
 ## Mind-Match Command Line
 
-To perform Mind Match, you can clone the repository and run the follows
+Mind-Match is a session we run at Cognitive Computational Neuroscience (CCN) conference.
+We use a combination of topic modeling and linear programming to solve optimal matching problem.
+To run example Mind-Match algorithm, you can clone the repository and run the following
 
 ``` sh
 python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=800
 ```
 
-directly in this path. This should produce a matching output `output_match.csv` in this relative location.
+in the root of this repo. This should produce a matching output `output_match.csv` in this relative location.
 Here, we have around 1,300 users and recommended to trim around 800. This takes 2-3 hours to run.
 
 ## Example script for the conferences
@@ -35,9 +37,13 @@ You can see of how it works below.
 
 ## Dependencies
 
-This can be done by running `pip install -r requirements.txt`.
+Use `pip` to install dependencies
 
-See `requirements.txt` for all the dependencies. Please refer to [Stackoverflow](http://stackoverflow.com/questions/26593497/cant-install-or-tools-on-mac-10-10) on how to install `or-tools` on MacOSX. You can use `pip` to install `protobuf` before installing `or-tools`
+```bash
+pip install -r requirements.txt
+```
+
+Please see [Stackoverflow](http://stackoverflow.com/questions/26593497/cant-install-or-tools-on-mac-10-10) if you have a problem installing `or-tools` on MacOS. You can use `pip` to install `protobuf` before installing `or-tools`
 
 ```bash
 pip install protobuf==3.0.0b4
@@ -50,9 +56,24 @@ for Python 3.6,
 pip install --user --upgrade ortools
 ```
 
+## Citations
+
+If you use Paper-Reviewer Matcher in your work or conference, please cite us as follows
+
+```
+@misc{achakulvisut2018,
+    author = {Achakulvisut, Titipat and Acuna, Daniel E. and Kording, Konrad},
+    title = {Paper-Reviewer Matcher},
+    year = {2018},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/titipata/paper-reviewer-matcher}},
+    commit = {9d346ee008e2789d34034c2b330b6ba483537674}
+}
+```
+
 ## Members
 
-- Daniel Acuna (corresponding author)
-- Titipat Achakulvisut (re-write code)
-- Tulakan Ruangrong
-- Konrad Kording
+- [Daniel Acuna](https://scienceofscience.org/) (original author)
+- [Titipat Achakulvisut](https://github.com/titipata) (refactor)
+- [Konrad Kording](http://kordinglab.com/)
