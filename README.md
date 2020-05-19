@@ -4,10 +4,7 @@ A python package for paper-reviewer matching algorithm based on topic modeling a
 
 Here is a diagram of problem setup and how we solve the problem.
 
-<img
-  src="figures/problem_setup.png"
-  width="300"
->
+<img src="figures/problem_setup.png" width="300">
 
 ## Mind-Match Command Line
 
@@ -16,11 +13,11 @@ We use a combination of topic modeling and linear programming to solve optimal m
 To run example Mind-Match algorithm, you can clone the repository and run the following
 
 ```sh
-python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=800
+python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=50
 ```
 
 in the root of this repo. This should produce a matching output `output_match.csv` in this relative location.
-Here, we have around 1,300 users and recommended to trim around 800. This takes 2-3 hours to run.
+Here, we have around 500 users and recommended to trim around 50. This takes 1 hours to run.
 
 ## Example script for the conferences
 
@@ -36,10 +33,7 @@ After that, we make the output that can be used by the organizers of the CCN con
 schedule between people to people in the conference.
 You can see of how it works below.
 
-<img
-  src="figures/paper_reviewer_matching.png"
-  width="800"
->
+<img src="figures/paper_reviewer_matching.png" width="800">
 
 ## Dependencies
 

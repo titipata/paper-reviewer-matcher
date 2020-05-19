@@ -162,11 +162,11 @@ if __name__ == "__main__":
 
     if (b.sum() != 0):
         output = []
-        user_ids = list(df['user_id'])
+        user_ids_map = {ri: r['user_id'] for ri, r in df.iterrows()}
         for i in range(len(b)):
-            match_ids = [str(user_ids[b_]) for b_ in np.nonzero(b[i])[0]]
+            match_ids = [str(user_ids_map[b_]) for b_ in np.nonzero(b[i])[0]]
             output.append({
-                'user_id': user_ids[i],
+                'user_id': user_ids_map[i],
                 'match_ids': ';'.join(match_ids)
             })
         output_df = pd.DataFrame(output)
