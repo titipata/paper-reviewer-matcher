@@ -4,7 +4,10 @@ A python package for paper-reviewer matching algorithm based on topic modeling a
 
 Here is a diagram of problem setup and how we solve the problem.
 
-<img src="figures/problem_setup.png" width="300">
+<img
+  src="figures/problem_setup.png"
+  width="300"
+>
 
 ## Mind-Match Command Line
 
@@ -12,7 +15,7 @@ Mind-Match is a session we run at Cognitive Computational Neuroscience (CCN) con
 We use a combination of topic modeling and linear programming to solve optimal matching problem.
 To run example Mind-Match algorithm, you can clone the repository and run the following
 
-``` sh
+```sh
 python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=800
 ```
 
@@ -33,26 +36,29 @@ After that, we make the output that can be used by the organizers of the CCN con
 schedule between people to people in the conference.
 You can see of how it works below.
 
-<img src="figures/paper_reviewer_matching.png" width="800">
+<img
+  src="figures/paper_reviewer_matching.png"
+  width="800"
+>
 
 ## Dependencies
 
 Use `pip` to install dependencies
 
-```bash
+```sh
 pip install -r requirements.txt
 ```
 
 Please see [Stackoverflow](http://stackoverflow.com/questions/26593497/cant-install-or-tools-on-mac-10-10) if you have a problem installing `or-tools` on MacOS. You can use `pip` to install `protobuf` before installing `or-tools`
 
-```bash
+```sh
 pip install protobuf==3.0.0b4
 pip install ortools
 ```
 
 for Python 3.6,
 
-```bash
+```sh
 pip install --user --upgrade ortools
 ```
 

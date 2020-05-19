@@ -6,3 +6,4 @@ scikit-learn
 protobuf==3.0.0b4
 ortools
 fuzzywuzzy
+dedupe-hcluster
