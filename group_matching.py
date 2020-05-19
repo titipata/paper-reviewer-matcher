@@ -39,14 +39,14 @@ if __name__ == '__main__':
     n_users = len(users)
     print('Number of registered users: {}'.format(n_users))
 
-    users_df = pd.DataFrame(users)
+    users_df = pd.DataFrame(users).fillna('')
     users_dict = {r['user_id']: dict(r) for _, r in users_df.iterrows()}  # map of user id to details
     persons_1 = list(map(preprocess, list(users_df['abstracts'])))
     persons_2 = list(map(preprocess, list(users_df['abstracts'])))
     A = affinity_computation(persons_1, persons_2,
                              n_components=30, min_df=2, max_df=0.8,
                              weighting='tfidf', projection='svd')
-    cois_list = compute_conflicts(users)
+    cois_list = compute_conflicts(users_df)
     for i, j in cois_list:
         A[i, j] = -1
 
