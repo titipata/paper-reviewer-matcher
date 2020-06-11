@@ -33,6 +33,16 @@ def compute_conflicts(df):
                 cois.append([j, i])
     return cois
 
+def generate_pod_numbers(n_users, n_per_group):
+    """
+    Generate pod numbers in sequence
+    """
+    groups = []
+    for i in range(1, int(n_users / n_per_group) + 2):
+        groups.extend([i] * n_per_group)
+    groups = groups[:n_users]
+    return groups
+
 
 if __name__ == '__main__':
     users = pd.read_csv('data/mindmatch_example.csv').to_dict(orient='records')
@@ -60,5 +70,8 @@ if __name__ == '__main__':
                 optimal_ordering=True)
     cluster = hcluster.fcluster(z, t=0.01,
                                 criterion='distance') # distance
-    users_group_df = users_df.iloc[cluster - 1, :]
-    # TODO: save output as JSON, code how to group as 6 (as an example)
+    users_group_df['cluster'] = cluster
+    users_sorted_df  = users_group_df.sort_values('cluster')
+    cluster_numbers = generate_pod_numbers(n_users=len(users_sorted_df), n_per_group=5)
+    users_sorted_df['cluster'] = cluster_numbers
+    users_sorted_df.to_csv('group_matching_users.csv', index=False)
