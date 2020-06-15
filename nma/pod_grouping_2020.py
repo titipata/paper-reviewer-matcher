@@ -44,6 +44,23 @@ def compute_tz_distance(node_1, node_2):
         return 20
 
 
+def compute_tz_distance_dict(d1, d2):
+    """
+    Compute timezone distance
+    """
+    idx1 = d1['idx']
+    idx2 = d2['idx']
+    if d1['timezone'] == d2['timezone'] and d1['second_timezone'] == d2['second_timezone']:
+        return (idx1, idx2, 0.0)
+    elif d1['timezone'] == d2['timezone'] and d1['second_timezone'] != d2['second_timezone']:
+        return (idx1, idx2, 0.3)
+    elif d1['timezone'] == d2['timezone'] or d1['second_timezone'] == d2['second_timezone']\
+        or d1['second_timezone'] == d2['timezone'] or d1['timezone'] == d2['second_timezone']:
+        return (idx1, idx2, 0.3)
+    else:
+        return (idx1, idx2, 1.0)
+
+
 def calculate_timezone_distance(preferred_tz):
     """
     Sending array and distance function
@@ -67,16 +84,78 @@ def generate_pod_numbers(n_students=2157, n_per_group=18):
     return groups
 
 
-def calculate_geo_distance(lat1, lng1, lat2, lng2, R=6373.0):
+def calculate_geo_distance(d1, d2, R=6373.0):
     """
     Calculate geolocation in kilometers between two geolocation
     """
-    d_lng = lng1 - lng2
-    d_lat = lat1 - lat2
-    a = np.sin(d_lat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(d_lng / 2)**2
-    c = 2 * atan2(np.sqrt(a), np.sqrt(1 - a))
-    distance = R * c
-    return distance
+    lat1, lng1 = d1['lat'], d1['lng']
+    lat2, lng2 = d2['lat'], d2['lng']
+    try:
+        d_lng = lng1 - lng2
+        d_lat = lat1 - lat2
+        a = np.sin(d_lat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(d_lng / 2)**2
+        c = 2 * atan2(np.sqrt(a), np.sqrt(1 - a))
+        distance = R * c
+        return (d1['idx'], d2['idx'], distance)
+    except:
+        return (d1['idx'], d2['idx'], np.nan)
+
+
+def calculate_geo_distance_matrix(df):
+    """
+    Calculate geo distance matrix from a given dataframe
+    """
+    n_users = len(df)
+    lat_lng_df = df[['idx', 'index', 'institute_longitude', 'institute_latitude']].rename(
+        columns={'institute_longitude': 'lng', 'institute_latitude': 'lat'}
+    )
+    lat_lng_list = lat_lng_df.to_dict(orient='records')
+    distance_df = pd.DataFrame(list(product(lat_lng_list, lat_lng_list)), columns=['loc1', 'loc2']).apply(
+        lambda r: calculate_geo_distance(r['loc1'], r['loc2']), axis=1
+    )
+    d_fill = np.nanmean([d for _, _, d in distance_df.values])
+    D_lat_lng = np.zeros((n_users, n_users))
+    for idx1, idx2, d in distance_df.values:
+        if not pd.isnull(d):
+            D_lat_lng[idx1, idx2] = d
+        else:
+            D_lat_lng[idx1, idx2] = d_fill
+    return D_lat_lng
+
+
+def calculate_language_distance_matrix(df):
+    """
+    Calculate langugage distance matrix from a given dataframe
+
+    The distance will be -0.5 if they have the same language preference
+    """
+    n_users = len(df)
+    language_list = df[['idx', 'language']].to_dict(orient='records')
+    D_language = np.zeros((n_users, n_users))
+    for d1, d2 in product(language_list, language_list):
+        if (d1['language'] or '') == (d2['language'] or '') and d1['idx'] != d2['idx']:
+            D_language[d1['idx'], d2['idx']] = -0.5
+    return D_language
+
+
+def calculate_timezone_distance_matrix(df):
+    """
+    Calculate timezone distance matrix from a given dataframe
+    """
+    n_users = len(df)
+    timezone_df = df[['idx', 'timezone', 'second_timezone']]
+    timezone_df.loc[:, 'timezone'] = timezone_df.timezone.map(
+        lambda t: remove_text_parentheses(t).split(' ')[-1]
+    )
+    timezone_df.loc[:, 'second_timezone'] = timezone_df.second_timezone.map(
+        lambda t: remove_text_parentheses(t).split(' ')[-1].replace('me', ' ')
+    )
+    timezone_list = timezone_df.to_dict(orient='records')
+    D_tz = np.zeros((n_users, n_users))
+    for d1, d2 in product(timezone_list, timezone_list):
+        idx1, idx2, tz_dist = compute_tz_distance_dict(d1, d2)
+        D_tz[idx1, idx2] = tz_dist
+    return D_tz
 
 
 def check_if_overlap(r1, r2,
@@ -93,11 +172,27 @@ def check_if_overlap(r1, r2,
     return any([tz1 == tz2 for tz1, tz2 in product(r1_, r2_)])
 
 
+def check_if_timezone_overlap(d1, d2):
+    """
+    Check if two dictionary have overlap in timezone,
+    if not, return an index between two dictionaries
+    """
+    tz_avail_1 = set([v for k, v in d1.items()
+                      if (k != 'idx' and not pd.isnull(v) and v != '')])
+    tz_avail_2 = set([v for k, v in d2.items()
+                      if (k != 'idx' and not pd.isnull(v) and v != '')])
+    if len(tz_avail_1.intersection(tz_avail_2)) == 0:
+        return (d1['idx'], d2['idx'])
+    else:
+        return None
+
+
 def generate_cannot_link_list(df, cols_tz=['timezone', 'second_timezone', 'third_timezone']):
     """
     Return list of cannot link tuple between indices e.g.
     [(1, 10), (10, 1), ...]
     """
+    cols = ['index', 'timezone', 'second_timezone', 'third_timezone']
     cannot_link = []
     for i, r1 in tqdm_notebook(df[cols].iterrows()):
         for j, r2 in df[cols].iterrows():
@@ -106,11 +201,26 @@ def generate_cannot_link_list(df, cols_tz=['timezone', 'second_timezone', 'third
     return cannot_link
 
 
+def generate_cannot_list_list(df):
+    """
+    A more efficient way to generate cannot link list
+    """
+    cols_tz = ['idx', 'timezone', 'second_timezone', 'third_timezone']
+    tz_df = df[cols_tz]
+    tz_df.fillna('', inplace=True)
+    tz_df['timezone'] = tz_df.timezone.map(lambda t: remove_text_parentheses(t).split(' ')[-1].replace('me', ' '))
+    tz_df['second_timezone'] = tz_df.second_timezone.map(lambda t: remove_text_parentheses(t).split(' ')[-1].replace('me', ' '))
+    tz_df['third_timezone'] = tz_df.third_timezone.map(lambda t: remove_text_parentheses(t).split(' ')[-1].replace('me', ' '))
+    tz_list = tz_df.to_dict(orient='records')
+    tz_pair_df = pd.DataFrame(list(product(tz_list, tz_list)), columns=['tz1', 'tz2'])
+    cannot_link = list(tz_pair_df.apply(lambda r: check_if_timezone_overlap(r['tz1'], r['tz2']), axis=1).dropna())
+    return cannot_link
+
+
 if __name__ == '__main__':
     # starter
     df = pd.read_csv('nma_applicants.csv', index=False)
     scaler = MinMaxScaler()
-
 
     # calculate timezone distance
     preferred_tz = df['timezone'].map(lambda t: remove_text_parentheses(t).split(' ')[-1])
