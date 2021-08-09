@@ -8,12 +8,14 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics.pairwise import euclidean_distances, cosine_distances
 
 __all__ = ["compute_topics",
-           "affinity_computation",
+           "calculate_affinity_distance",
+           "compute_affinity",
            "create_lp_matrix",
            "create_assignment"]
 
+
 def compute_topics(
-    papers,
+    papers: list,
     weighting='tfidf',
     projection='svd',
     min_df=3, max_df=0.8,
@@ -24,7 +26,7 @@ def compute_topics(
     stop_words='english'
 ):
     """
-    Compute topics
+    Compute topics from a given list of ``papers``
     """
     if weighting == 'count':
         model = CountVectorizer(min_df=min_df, max_df=max_df,
@@ -67,6 +69,20 @@ def compute_topics(
     return X_topic
 
 
+def calculate_affinity_distance(X1, X2, distance: str = "euclidean"):
+    """
+    Calculate affinity matrix between matrix X1 and X2
+    """
+    if distance == 'euclidean':
+        D = - euclidean_distances(X1, X2) # dense affinity matrix
+    elif distance == 'cosine':
+        D = - cosine_distances(X1, X2) # dense affinity matrix
+    else:
+        D = None
+        print("Distance function can only be selected from `euclidean` or `cosine`")
+    return D
+
+
 def compute_affinity(papers, reviewers,
                      weighting='tfidf',
                      projection='svd',
@@ -90,65 +106,30 @@ def compute_affinity(papers, reviewers,
     projection: str, either 'svd' or 'pca' for topic modeling
     distance: str, either 'euclidean' or 'cosine' distance
 
-
     Returns
     -------
     A: ndarray, affinity array from given papers and reviewers
     """
     n_papers = len(papers)
 
-    if weighting == 'count':
-        model = CountVectorizer(min_df=min_df, max_df=max_df,
-                                token_pattern=token_pattern,
-                                ngram_range=ngram_range,
-                                stop_words=stop_words)
-    elif weighting == 'tfidf':
-        model = TfidfVectorizer(min_df=min_df, max_df=max_df,
-                                lowercase=lowercase, norm=norm,
-                                token_pattern=token_pattern,
-                                ngram_range=ngram_range,
-                                use_idf=True, smooth_idf=True, sublinear_tf=True,
-                                stop_words=stop_words)
-    elif weighting == 'entropy':
-        model = LogEntropyVectorizer(min_df=min_df, max_df=max_df,
-                                     lowercase=lowercase,
-                                     token_pattern=token_pattern,
-                                     ngram_range=ngram_range,
-                                     stop_words=stop_words)
-    elif weighting == 'bm25':
-        model = BM25Vectorizer(min_df=min_df, max_df=max_df,
-                               lowercase=lowercase,
-                               token_pattern=token_pattern,
-                               ngram_range=ngram_range,
-                               stop_words=stop_words)
-    else:
-        print("select weighting scheme from ['count', 'tfidf', 'entropy', 'bm25']")
-
-    X = model.fit_transform(papers + reviewers) # weighting matrix
-
-    # topic modeling
-    if projection == 'svd':
-        topic_model = TruncatedSVD(n_components=n_components, algorithm='arpack')
-        X_topic = topic_model.fit_transform(X)
-    elif projection == 'pca':
-        topic_model = PCA(n_components=n_components)
-        X_topic = topic_model.fit_transform(X.todense())
-    else:
-        print("select projection from ['svd', 'pca']")
+    X_topic = compute_topics(
+        papers + reviewers,
+        weighting=weighting,
+        projection=projection,
+        min_df=min_df, max_df=max_df,
+        lowercase=lowercase, norm=norm,
+        token_pattern=token_pattern,
+        ngram_range=ngram_range,
+        n_components=n_components,
+        stop_words=stop_words
+    )
 
     # compute affinity matrix
     paper_vectors = X_topic[:n_papers, :]
     reviewer_vectors = X_topic[n_papers:, :]
-
-    if distance == 'euclidean':
-        A = - euclidean_distances(paper_vectors, reviewer_vectors) # dense affinity matrix
-    elif distance == 'cosine':
-        A = - cosine_distances(paper_vectors, reviewer_vectors) # dense affinity matrix
-    else:
-        A = None
-        print("Distance function can only be selected from `euclidean` or `cosine`")
-
+    A = calculate_affinity_distance(paper_vectors, reviewer_vectors, distance=distance)
     return A
+
 
 def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=10,
                         min_papers_per_reviewer=0, max_papers_per_reviewer=10):
@@ -199,6 +180,7 @@ def create_lp_matrix(A, min_reviewers_per_paper=0, max_reviewers_per_paper=10,
     d = np.atleast_2d(d).T # column constraint vector
 
     return v, K, d
+
 
 def create_assignment(x_sol, A):
     """

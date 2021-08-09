@@ -8,18 +8,27 @@ from .affinity import create_lp_matrix, create_assignment
 __all__ = ["perform_mindmatch"]
 
 
-def compute_conflicts(df: pd.DataFrame, ratio: int = 85):
+def compute_conflicts(df: pd.DataFrame, ratio: int = 85, sep: str = ";"):
     """
     Compute conflict for a given dataframe
+
+    Parameters
+    ==========
+    df: pd.Dataframe, a dataframe which have a column "conflicts"
+        where each row has
+        scientist names with separator (default as semicolon ;)
+    ratio: int, Fuzzy matching ratio, 100 mean exact match, 85 allow some errors
+    sep: str, a separator
     """
     cois = []
     for i, r in tqdm(df.iterrows()):
-        exclude_list = r['conflicts'].split(';')
+        exclude_list = r['conflicts'].split(sep)
         for j, r_ in df.iterrows():
             if max([fuzz.ratio(r_['fullname'], n) for n in exclude_list]) >= ratio:
                 cois.append([i, j])
                 cois.append([j, i])
     return cois
+
 
 def perform_mindmatch(
     A: np.array, n_trim: int = None,

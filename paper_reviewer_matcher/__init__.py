@@ -1,6 +1,7 @@
 from .preprocess import preprocess
 from .affinity import (
     compute_topics, compute_affinity,
+    calculate_affinity_distance,
     create_lp_matrix, create_assignment
 )
 from .vectorizer import LogEntropyVectorizer, BM25Vectorizer
