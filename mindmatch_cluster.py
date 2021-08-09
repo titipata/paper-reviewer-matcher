@@ -5,9 +5,9 @@ Here, we add a trick to make the problem smaller by applying spectral clustering
 apply mind-matching to each cluster.
 
 Usage:
-  mindmatch.py PATH [--n_match=<n_match>] [--n_trim=<n_trim>] [--output=<output>] [--n_clusters=<n_clusters>]
-  mindmatch.py [-h | --help]
-  mindmatch.py [-v | --version]
+  mindmatch_cluster.py PATH [--n_match=<n_match>] [--n_trim=<n_trim>] [--output=<output>] [--n_clusters=<n_clusters>]
+  mindmatch_cluster.py [-h | --help]
+  mindmatch_cluster.py [-v | --version]
 
 Arguments:
   PATH                  Path to a CSV file, 
