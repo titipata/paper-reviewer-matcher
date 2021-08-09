@@ -33,7 +33,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__, version='MindMatch 0.1.dev')
 
     file_name = arguments['PATH']
-    df = pd.read_csv(file_name).fillna('')
+    df = pd.read_csv(file_name).fillna('').sample(n=500).reset_index(drop=True)
     assert 'user_id' in df.columns, "CSV file must have ``user_id`` in the columns"
     assert 'fullname' in df.columns, "CSV file must have ``fullname`` in the columns"
     assert 'abstracts' in df.columns, "CSV file must have ``abstracts`` in the columns"
