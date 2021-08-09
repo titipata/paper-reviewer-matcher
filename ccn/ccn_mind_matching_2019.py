@@ -23,7 +23,8 @@ from itertools import chain
 from fuzzywuzzy import fuzz
 from paper_reviewer_matcher import (
     preprocess, compute_affinity,
-    create_lp_matrix, linprog, create_assignment
+    create_lp_matrix, linprog,
+    create_assignment
 )
 from docx import Document
 

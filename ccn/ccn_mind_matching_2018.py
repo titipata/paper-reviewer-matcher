@@ -13,8 +13,6 @@ from paper_reviewer_matcher import (
 )
 import random
 import networkx as nx
-from itertools import chain
-from collections import Counter
 
 
 def build_line_graph(people):

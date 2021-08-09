@@ -4,7 +4,8 @@ import pandas as pd
 import scipy.sparse as sp
 from paper_reviewer_matcher import (
     preprocess, compute_affinity,
-    create_lp_matrix, linprog, create_assignment
+    create_lp_matrix, linprog,
+    create_assignment
 )
 
 
