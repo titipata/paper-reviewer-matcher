@@ -16,8 +16,9 @@ from tqdm import tqdm
 
 from scipy.cluster.hierarchy import linkage
 import hcluster   # requires dedupe-hcluster
-from paper_reviewer_matcher import preprocess, affinity_computation, \
-                                   create_lp_matrix, create_assignment
+from paper_reviewer_matcher import (
+    preprocess, compute_affinity
+)
 
 
 def compute_conflicts(df):
@@ -53,9 +54,11 @@ if __name__ == '__main__':
     users_dict = {r['user_id']: dict(r) for _, r in users_df.iterrows()}  # map of user id to details
     persons_1 = list(map(preprocess, list(users_df['abstracts'])))
     persons_2 = list(map(preprocess, list(users_df['abstracts'])))
-    A = affinity_computation(persons_1, persons_2,
-                             n_components=30, min_df=2, max_df=0.8,
-                             weighting='tfidf', projection='svd')
+    A = compute_affinity(
+        persons_1, persons_2,
+        n_components=30, min_df=2, max_df=0.8,
+        weighting='tfidf', projection='svd'
+    )
     cois_list = compute_conflicts(users_df)
     for i, j in cois_list:
         A[i, j] = -1

@@ -6,7 +6,11 @@ then solve linear programming problem and apply networkx to solve the schedule p
 
 import numpy as np
 import pandas as pd
-from paper_reviewer_matcher import preprocess, affinity_computation, create_lp_matrix, linprog, create_assignment
+from paper_reviewer_matcher import (
+    preprocess, compute_affinity,
+    create_lp_matrix, linprog,
+    create_assignment
+)
 import random
 import networkx as nx
 from itertools import chain
@@ -123,9 +127,11 @@ def create_dating_schedule(person_df, n_meeting=10):
     persons_1 = list(map(preprocess, list(person_df['Abstract'])))
     persons_2 = list(map(preprocess, list(person_df['Abstract'])))
 
-    A = affinity_computation(persons_1, persons_2,
-                             n_components=10, min_df=1, max_df=0.8,
-                             weighting='tfidf', projection='pca')
+    A = compute_affinity(
+        persons_1, persons_2,
+        n_components=10, min_df=1, max_df=0.8,
+        weighting='tfidf', projection='pca'
+    )
     # constraints, conflict of interest
     A[np.arange(len(A)), np.arange(len(A))] = -1000
 

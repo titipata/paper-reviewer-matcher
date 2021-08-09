@@ -19,23 +19,16 @@ Options:
   --n_trim=<n_trim>     Trimming parameter for distance matrix, increase to reduce problem size
   --output=<output>     Output CSV file contains 'user_id' and 'match_ids' which has match ids with ; separated
 """
-
-import os
-import sys
-
+from paper_reviewer_matcher.affinity import compute_affinity
 import numpy as np
 import pandas as pd
 from docopt import docopt
-
-from ortools.linear_solver import pywraplp
 from paper_reviewer_matcher import (
     preprocess,
-    affinity_computation,
+    compute_affinity,
     perform_mindmatch,
     compute_conflicts
 )
-from fuzzywuzzy import fuzz
-from tqdm.auto import tqdm
 
 
 if __name__ == "__main__":
@@ -73,9 +66,11 @@ if __name__ == "__main__":
     # create affinity matrix and compute conflicts
     persons_1 = list(map(preprocess, list(df['abstracts'])))
     persons_2 = list(map(preprocess, list(df['abstracts'])))
-    A = affinity_computation(persons_1, persons_2,
-                             n_components=30, min_df=3, max_df=0.85,
-                             weighting='tfidf', projection='pca')
+    A = compute_affinity(
+        persons_1, persons_2,
+        n_components=30, min_df=3, max_df=0.85,
+        weighting='tfidf', projection='pca'
+    )
     print('Compute conflicts... (this may take a bit)')
     cois = compute_conflicts(df, ratio=85)
     print('Done computing conflicts!')

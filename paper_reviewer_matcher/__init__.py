@@ -1,6 +1,8 @@
-import sys
 from .preprocess import preprocess
-from .affinity import affinity_computation, create_lp_matrix, create_assignment
+from .affinity import (
+    compute_topics, compute_affinity,
+    create_lp_matrix, create_assignment
+)
 from .vectorizer import LogEntropyVectorizer, BM25Vectorizer
 try:
     from .lp import linprog

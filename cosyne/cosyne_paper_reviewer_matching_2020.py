@@ -4,58 +4,12 @@ import numpy as np
 import pandas as pd
 import paper_reviewer_matcher as pm
 import scipy.sparse as sp
-from paper_reviewer_matcher import preprocess, affinity_computation, \
-    create_lp_matrix, create_assignment
-from scipy.sparse import coo_matrix
-from ortools.linear_solver import pywraplp
+from paper_reviewer_matcher import (
+    preprocess, compute_affinity,
+    create_lp_matrix, create_assignment,
+    linprog
+)
 from fuzzywuzzy import fuzz
-
-
-def linprog(f, A, b):
-    '''
-    Solve the following linear programming problem
-            maximize_x (f.T).dot(x)
-            subject to A.dot(x) <= b
-    where   A is a sparse matrix (coo_matrix)
-            f is column vector of cost function associated with variable
-            b is column vector
-    '''
-
-    # flatten the variable
-    f = f.ravel()
-    b = b.ravel()
-
-    solver = pywraplp.Solver('SolveReviewerAssignment',
-                             pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
-
-    infinity = solver.Infinity()
-    n, m = A.shape
-    x = [[]] * m
-    c = [0] * n
-
-    for j in range(m):
-        x[j] = solver.NumVar(-infinity, infinity, 'x_%u' % j)
-
-    # state objective function
-    objective = solver.Objective()
-    for j in range(m):
-        objective.SetCoefficient(x[j], f[j])
-    objective.SetMaximization()
-
-    # state the constraints
-    for i in range(n):
-        c[i] = solver.Constraint(-infinity, int(b[i]))
-        for j in A.col[A.row == i]:
-            c[i].SetCoefficient(
-                x[j], A.data[np.logical_and(A.row == i, A.col == j)][0])
-
-    result_status = solver.Solve()
-    if result_status != 0:
-        print("The final solution might not converged")
-
-    x_sol = np.array([x_tmp.SolutionValue() for x_tmp in x])
-
-    return {'x': x_sol, 'status': result_status}
 
 
 def find_user_ids(authors):
@@ -148,9 +102,9 @@ if __name__ == '__main__':
     reviewers_b = list((reviewer_b_df['keywords'] +
                         ' ' + reviewer_b_df['SampleAbstract1'].fillna('') +
                         ' ' + reviewer_b_df['SampleAbstract2'].fillna('')).map(preprocess))
-    A = affinity_computation(papers, reviewers_a + reviewers_b,
-                             n_components=15, min_df=2, max_df=0.85,
-                             weighting='tfidf', projection='pca')
+    A = compute_affinity(papers, reviewers_a + reviewers_b,
+                         n_components=15, min_df=2, max_df=0.85,
+                         weighting='tfidf', projection='pca')
 
     # COIs
     cois_ids = submission_df.AuthorIds.map(

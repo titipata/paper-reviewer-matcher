@@ -3,13 +3,14 @@ from math import atan2
 import numpy as np
 import pandas as pd
 import paper_reviewer_matcher as pp
-from paper_reviewer_matcher import preprocess, affinity_computation, \
-                                   create_lp_matrix, create_assignment
+from paper_reviewer_matcher import (
+    preprocess, compute_affinity,
+    create_lp_matrix, create_assignment
+)
 from scipy.cluster.hierarchy import linkage
-import hcluster
 from sklearn.preprocessing import MinMaxScaler
-import copkmeans
-from itertools import combinations, permutations, product
+
+from itertools import product
 from tqdm import tqdm, tqdm_notebook
 
 from sklearn.manifold import MDS
@@ -233,9 +234,9 @@ if __name__ == '__main__':
     # calculate topic distance between statement
     persons_1 = list(map(preprocess, list(df['Statement'])))
     persons_2 = list(map(preprocess, list(df['Statement'])))
-    D_statement = - affinity_computation(persons_1, persons_2,
-                                        n_components=30, min_df=2, max_df=0.8,
-                                        weighting='tfidf', projection='svd')
+    D_statement = - compute_affinity(persons_1, persons_2,
+                                     n_components=30, min_df=2, max_df=0.8,
+                                     weighting='tfidf', projection='svd')
     std_topic = D_statement.std()
 
     # list of cannot link
