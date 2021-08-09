@@ -1,22 +1,19 @@
 import numpy as np
+from tqdm.auto import tqdm
 from scipy.sparse import coo_matrix
-
-try:
-    from ortools.linear_solver import pywraplp
-except ImportError:
-    print("or-tools does not seem to be installed. Skipping for now")
+from ortools.linear_solver import pywraplp
 
 __all__ = ["linprog"]
 
 def linprog(f, A, b):
-    '''
+    """
     Solve the following linear programming problem
             maximize_x (f.T).dot(x)
             subject to A.dot(x) <= b
     where   A is a sparse matrix (coo_matrix)
             f is column vector of cost function associated with variable
             b is column vector
-    '''
+    """
 
     # flatten the variable
     f = f.ravel()
@@ -30,17 +27,20 @@ def linprog(f, A, b):
     x = [[]] * m
     c = [0] * n
 
-    for j in range(m):
+    print("Setting up variables...")
+    for j in tqdm(range(m)):
         x[j] = solver.NumVar(-infinity, infinity, 'x_%u' % j)
 
     # state objective function
+    print("Setting up objective function...")
     objective = solver.Objective()
-    for j in range(m):
+    for j in tqdm(range(m)):
         objective.SetCoefficient(x[j], f[j])
     objective.SetMaximization()
 
     # state the constraints
-    for i in range(n):
+    print("Setting up constraints...")
+    for i in tqdm(range(n)):
         c[i] = solver.Constraint(-infinity, int(b[i]))
         for j in A.col[A.row == i]:
             c[i].SetCoefficient(x[j], A.data[np.logical_and(A.row == i, A.col == j)][0])

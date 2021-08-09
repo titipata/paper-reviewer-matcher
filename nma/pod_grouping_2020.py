@@ -219,23 +219,14 @@ def generate_cannot_list_list(df):
 
 if __name__ == '__main__':
     # starter
-    df = pd.read_csv('nma_applicants.csv', index=False)
     scaler = MinMaxScaler()
+    df = pd.read_csv('nma_applicants.csv', index=False)
 
     # calculate timezone distance
-    preferred_tz = df['timezone'].map(lambda t: remove_text_parentheses(t).split(' ')[-1])
-    D_tz = calculate_timezone_distance(preferred_tz)
+    D_tz = calculate_timezone_distance_matrix(df)
 
     # calculate geolocation distance
-    lat_lng_df = df[['institute_longitude', 'institute_latitude']].rename(
-        columns={'institute_longitude': 'lng', 'institute_latitude': 'lat'}
-    )
-    D_lat_lng = []
-    for _, r1 in lat_lng_df.iterrows():
-        D_lat_lng.append([
-            calculate_geo_distance(r1.lat, r1.lng, r2.lat, r2.lng)
-                                    for _, r2 in lat_lng_df.iterrows()
-        ])
+    D_lat_lng = calculate_geo_distance_matrix(df)
     D_lat_lng_scale = scaler.fit_transform(D_lat_lng)
     D_lat_lng_scale = pd.DataFrame(D_lat_lng_scale).fillna(np.nanmean(D_lat_lng_scale)).values
 
@@ -246,6 +237,9 @@ if __name__ == '__main__':
                                         n_components=30, min_df=2, max_df=0.8,
                                         weighting='tfidf', projection='svd')
     std_topic = D_statement.std()
+
+    # list of cannot link
+    cannot_link = generate_cannot_list_list(df)
 
     # clustering
     D_final = (D_statement) + (10 * std_topic * D_tz) + (std_topic * D_lat_lng_scale) # final distance

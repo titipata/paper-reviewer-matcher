@@ -28,10 +28,14 @@ import pandas as pd
 from docopt import docopt
 
 from ortools.linear_solver import pywraplp
-from paper_reviewer_matcher import preprocess, affinity_computation, \
-                                   create_lp_matrix, create_assignment
+from paper_reviewer_matcher import (
+    preprocess,
+    affinity_computation,
+    perform_mindmatch
+)
 from fuzzywuzzy import fuzz
-from tqdm import tqdm
+from tqdm.auto import tqdm
+
 
 def linprog(f, A, b):
     """
@@ -131,34 +135,12 @@ if __name__ == "__main__":
     A = affinity_computation(persons_1, persons_2,
                              n_components=30, min_df=3, max_df=0.85,
                              weighting='tfidf', projection='pca')
-    A[np.arange(len(A)), np.arange(len(A))] = -1000  # set diagonal to prevent matching with themselve
-
     print('Compute conflicts... (this may take a bit)')
     cois = compute_conflicts(df)
-    A[cois] = -1000
     print('Done computing conflicts!')
 
-    # trimming affinity matrix to reduce the problem size
-    if n_trim != 0:
-        A_trim = []
-        for r in range(len(A)):
-            a = A[r, :]
-            a[np.argsort(a)[0:n_trim]] = 0
-            A_trim.append(a)
-        A_trim = np.vstack(A_trim)
-    else:
-        A_trim = A
-
-    print('Solving a matching problem...')
-    v, K, d = create_lp_matrix(A_trim, 
-                               min_reviewers_per_paper=n_match, max_reviewers_per_paper=n_match,
-                               min_papers_per_reviewer=n_match, max_papers_per_reviewer=n_match)
-    x_sol = linprog(v, K, d)['x']
-    b = create_assignment(x_sol, A_trim)
-    if (b.sum() == 0):
-        print('Seems like the problem does not converge, try reducing <n_trim> but not too low!')
-    else:
-        print('Successfully assigned all the match!')
+    # perform mindmatching
+    b = perform_mindmatch(A, n_trim=n_trim, n_match=n_match, cois=cois)
 
     if (b.sum() != 0):
         output = []
@@ -171,4 +153,6 @@ if __name__ == "__main__":
             })
         output_df = pd.DataFrame(output)
         output_df.to_csv(output_filename, index=False)
-        print('Successfully save the output match to {}'.format(output_filename))
+        print("Successfully save the output match to {}".format(output_filename))
+    else:
+        print("Cannot solve the problem")
