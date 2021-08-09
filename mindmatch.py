@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 """MindMatch: a script for matching people to people in the conference
-Run the script here since 
 
 Usage:
   mindmatch.py PATH [--n_match=<n_match>] [--n_trim=<n_trim>] [--output=<output>]
@@ -19,7 +18,6 @@ Options:
   --n_trim=<n_trim>     Trimming parameter for distance matrix, increase to reduce problem size
   --output=<output>     Output CSV file contains 'user_id' and 'match_ids' which has match ids with ; separated
 """
-from paper_reviewer_matcher.affinity import compute_affinity
 import numpy as np
 import pandas as pd
 from docopt import docopt

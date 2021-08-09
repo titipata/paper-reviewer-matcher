@@ -17,7 +17,13 @@ python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=50
 ```
 
 in the root of this repo. This should produce a matching output `output_match.csv` in this relative location.
-Here, we have around 500 users and recommended to trim around 50. This takes 1 hours to run.
+Here, we have around 500 users and recommended to trim around 50. However, this script takes quite a long time to run.
+If you want to make it runs faster, you can pre-cluster into groups and then run mind-matching
+separately as follows:
+
+```sh
+python mindmatch_cluster.py data/mindmatch_example.csv --n_match=6 --n_trim=50 --n_clusters=4
+```
 
 ## Example script for the conferences
 
