@@ -10,16 +10,16 @@ Here is a diagram of problem setup and how we solve the problem.
 
 Mind-Match is a session we run at Cognitive Computational Neuroscience (CCN) conference.
 We use a combination of topic modeling and linear programming to solve optimal matching problem.
-To run example Mind-Match algorithm, you can clone the repository and run the following
+To run example Mind-Match algorithm on sample of 500 people, you can clone the repository and run the following
 
 ```sh
 python mindmatch.py data/mindmatch_example.csv --n_match=6 --n_trim=50
 ```
 
 in the root of this repo. This should produce a matching output `output_match.csv` in this relative location.
-Here, we have around 500 users and recommended to trim around 50. However, this script takes quite a long time to run.
-If you want to make it runs faster, you can pre-cluster into groups and then run mind-matching
-separately as follows:
+However, when people get much larger this script takes quite a long time to run.
+We use pre-cluster into groups before running the mind-matching to make the script runs faster.
+Below is an example script for pre-clustering and mind-matching on all data:
 
 ```sh
 python mindmatch_cluster.py data/mindmatch_example.csv --n_match=6 --n_trim=50 --n_clusters=4
