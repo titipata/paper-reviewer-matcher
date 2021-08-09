@@ -8,4 +8,4 @@ try:
 except:
     from scipy.optimize import linprog
     print("Using scipy for ILP solver. It may take really long to solve. Please consider install ortool (see README).")
-from .mindmatch import perform_mindmatch
+from .mindmatch import perform_mindmatch, compute_conflicts

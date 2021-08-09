@@ -1,8 +1,25 @@
 import numpy as np
+import pandas as pd
+from fuzzywuzzy import fuzz
+from tqdm.auto import tqdm
 from .lp import linprog
 from .affinity import create_lp_matrix, create_assignment
 
 __all__ = ["perform_mindmatch"]
+
+
+def compute_conflicts(df: pd.DataFrame, ratio: int = 85):
+    """
+    Compute conflict for a given dataframe
+    """
+    cois = []
+    for i, r in tqdm(df.iterrows()):
+        exclude_list = r['conflicts'].split(';')
+        for j, r_ in df.iterrows():
+            if max([fuzz.ratio(r_['fullname'], n) for n in exclude_list]) >= ratio:
+                cois.append([i, j])
+                cois.append([j, i])
+    return cois
 
 def perform_mindmatch(
     A: np.array, n_trim: int = None,

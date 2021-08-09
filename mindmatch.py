@@ -31,70 +31,11 @@ from ortools.linear_solver import pywraplp
 from paper_reviewer_matcher import (
     preprocess,
     affinity_computation,
-    perform_mindmatch
+    perform_mindmatch,
+    compute_conflicts
 )
 from fuzzywuzzy import fuzz
 from tqdm.auto import tqdm
-
-
-def linprog(f, A, b):
-    """
-    Solve the following linear programming problem
-            maximize_x (f.T).dot(x)
-            subject to A.dot(x) <= b
-    where   A is a sparse matrix (coo_matrix)
-            f is column vector of cost function associated with variable
-            b is column vector
-    """
-
-    # flatten the variable
-    f = f.ravel()
-    b = b.ravel()
-
-    solver = pywraplp.Solver('SolveReviewerAssignment',
-                             pywraplp.Solver.GLOP_LINEAR_PROGRAMMING)
-
-    infinity = solver.Infinity()
-    n, m = A.shape
-    x = [[]] * m
-    c = [0] * n
-
-    for j in range(m):
-        x[j] = solver.NumVar(-infinity, infinity, 'x_%u' % j)
-
-    # state objective function
-    objective = solver.Objective()
-    for j in range(m):
-        objective.SetCoefficient(x[j], f[j])
-    objective.SetMaximization()
-
-    # state the constraints
-    for i in range(n):
-        c[i] = solver.Constraint(-infinity, int(b[i]))
-        for j in A.col[A.row == i]:
-            c[i].SetCoefficient(x[j], A.data[np.logical_and(A.row == i, A.col == j)][0])
-
-    result_status = solver.Solve()
-    if result_status != 0:
-        print("The final solution might not converged")
-
-    x_sol = np.array([x_tmp.SolutionValue() for x_tmp in x])
-
-    return {'x': x_sol, 'status': result_status}
-
-
-def compute_conflicts(df):
-    """
-    Compute conflict for a given dataframe
-    """
-    cois = []
-    for i, r in tqdm(df.iterrows()):
-        exclude_list = r['conflicts'].split(';')
-        for j, r_ in df.iterrows():
-            if max([fuzz.ratio(r_['fullname'], n) for n in exclude_list]) >= 85:
-                cois.append([i, j])
-                cois.append([j, i])
-    return cois
 
 
 if __name__ == "__main__":
@@ -129,14 +70,14 @@ if __name__ == "__main__":
     if output_filename is None:
         output_filename = 'output_match.csv'
 
-    # create assignment matrix
+    # create affinity matrix and compute conflicts
     persons_1 = list(map(preprocess, list(df['abstracts'])))
     persons_2 = list(map(preprocess, list(df['abstracts'])))
     A = affinity_computation(persons_1, persons_2,
                              n_components=30, min_df=3, max_df=0.85,
                              weighting='tfidf', projection='pca')
     print('Compute conflicts... (this may take a bit)')
-    cois = compute_conflicts(df)
+    cois = compute_conflicts(df, ratio=85)
     print('Done computing conflicts!')
 
     # perform mindmatching
