@@ -3,7 +3,7 @@ numpy
 scipy
 nltk
 scikit-learn
-protobuf==3.0.0b4
+protobuf==3.15.0
 ortools
 fuzzywuzzy
 dedupe-hcluster
